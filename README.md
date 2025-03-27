@@ -24,7 +24,7 @@ También puedes elegir la opción de hostear una página web con nuestras bases 
 
 ## 💻Tecnologías utilizadas
 
-* **SQL** 
+* **SQL** 📖 
 * **Kubernetes** 🐳
 * **AWS** ☁
 * **Bacula** 🛡
