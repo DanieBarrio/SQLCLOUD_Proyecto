@@ -1,20 +1,33 @@
 ---
-name: Plantilla-issue-idea
-about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: ''
+name: ✨ Solicitud de Característica
+about: Usa esta plantilla para solicitar nuevas funcionalidades o mejoras.
+title: "[FEATURE] Breve descripción de la solicitud"
+labels: enhancement, feature
+assignees: []
+---
+
+## Resumen de la solicitud 📝
+Describe brevemente la característica o mejora que te gustaría ver implementada.
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## Motivo de la solicitud 🤔
+Explica por qué esta característica sería útil. Incluye ejemplos de cómo podría beneficiar a los usuarios.
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+---
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+## Propuesta de solución (opcional) 💡
+Si tienes una idea de cómo implementar esta característica, descríbela aquí.
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+---
+
+## Alternativas consideradas (opcional) 🔄
+Menciona si has considerado otras formas de resolver el problema o si existe una solución alternativa actual.
+
+---
+
+## Prioridad 🔥
+Selecciona la prioridad de esta solicitud:
+- [ ] Baja
+- [ ] Media
+- [ ] Alta
