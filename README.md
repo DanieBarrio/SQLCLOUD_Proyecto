@@ -20,7 +20,7 @@
 
 * [Estado del proyecto](#Estado-del-proyecto)
 
-* [Licencia](#Licencia)
+* [Licencia](#Licencia-📜)
 
 * [Diagrama](#Diagrama)
 
