@@ -35,5 +35,5 @@
 
 ## Autores
 
-| <div align="center"><a href="https://github.com/DanieBarrio"><img src="https://avatars.githubusercontent.com/u/145673109?v=4" width="115"/><br><sub><strong>Daniel Barrio Domínguez</strong></sub></a></div> | <div align="center"><a href="https://github.com/Davidjimenez05"><img src="https://avatars.githubusercontent.com/u/145720278?v=4" width="115"/><br><sub><strong>Ellen Pimentel</strong></sub></a></div> |
+| <div align="center"><a href="https://github.com/DanieBarrio"><img src="https://avatars.githubusercontent.com/u/145673109?v=4" width="115"/><br><sub><strong>Daniel Barrio Domínguez</strong></sub></a></div> | <div align="center"><a href="https://github.com/Davidjimenez05"><img src="https://avatars.githubusercontent.com/u/145720278?v=4" width="115"/><br><sub><strong>David Jimenez Ruiz</strong></sub></a></div> |
 |:-----------------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------:|
