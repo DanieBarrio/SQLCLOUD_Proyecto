@@ -1,4 +1,4 @@
-# SQLCloud
+# ☁SQLCloud
 :rocket: El futuro del almacenamiento de datos en la nube y hosting de bases de datos. :rocket:
 
 ## 📑Índice
