@@ -1,5 +1,5 @@
 # ProyectoASIRTFG
-:construction: Proyecto de Hosting de Base de datos con y sin Headers :construction:
+:zap: Proyecto de Hosting de Base de datos con y sin Headers :zap:
 
 <p align="left">
   <img src="https://img.shields.io/badge/STATUS-EN%20DESAROLLO-green">
@@ -8,7 +8,7 @@
 
 # Índice
 
-* [Título e imagen de portada](#Título-e-imagen-de-portada)
+* [Título](#ProyectoASIRTFG)
 
 * [Insignias](#insignias)
 
@@ -30,7 +30,7 @@
 
 * [Licencia](https://github.com/DanieBarrio/ProyectoASIRTFG/blob/main/LICENSE)
 
-* [Conclusión](#conclusión)
+* [Diagrama](#conclusión)
 
 
 ## Autores
