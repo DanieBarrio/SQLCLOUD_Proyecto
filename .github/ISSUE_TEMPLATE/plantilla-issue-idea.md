@@ -1,5 +1,5 @@
 ---
-name: ".github/PLANTILLAS/plantillas_de_issues"
+name: Plantilla-issue-idea
 about: Suggest an idea for this project
 title: ''
 labels: ''
