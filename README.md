@@ -33,7 +33,7 @@
 ## Estado
 
 <p align="left">
-  <img src="https://img.shields.io/badge/STATUS-EMPEZANDO-green">
+  <img src="https://img.shields.io/badge/STATUS-EMPEZANDO-yellow">
 </p>
 
 ## Autores
