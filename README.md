@@ -12,13 +12,11 @@
 
 * [Descripción del proyecto](#descripción)
 
-* [Estado del proyecto](#Estado-del-proyecto)
-
 * [Características de la aplicación y demostración](#Características-de-la-aplicación-y-demostración)
 
 * [Acceso al proyecto](#acceso-proyecto)
 
-* [Tecnologías utilizadas](#tecnologías-utilizadas)
+* [Tecnologías utilizadas](#Tecnologías-utilizadas)
 
 * [Estado del proyecto](#Estado-del-proyecto)
 
