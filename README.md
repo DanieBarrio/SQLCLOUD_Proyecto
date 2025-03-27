@@ -12,7 +12,7 @@
 
 * [Insignias](#insignias)
 
-* [Índice](# Índice)
+* [Índice](#Índice)
 
 * [Descripción del proyecto](#descripción-del-proyecto)
 
