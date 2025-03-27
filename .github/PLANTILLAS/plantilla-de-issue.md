@@ -1,7 +1,7 @@
 ---
-name: ✨ Solicitud de Característica
-about: Usa esta plantilla para solicitar nuevas funcionalidades o mejoras.
-title: "[FEATURE] Breve descripción de la solicitud"
+name: ✨ Caracteristicas de Implementación
+about: Usa esta plantilla para solicitar nuevas funcionalidades.
+title: "[Implementación] Caracteristicas de Implementación"
 labels: enhancement, feature
 assignees: []
 ---
@@ -11,23 +11,13 @@ Describe brevemente la característica o mejora que te gustaría ver implementad
 
 ---
 
-## Motivo de la solicitud 🤔
-Explica por qué esta característica sería útil. Incluye ejemplos de cómo podría beneficiar a los usuarios.
-
----
-
-## Propuesta de solución (opcional) 💡
+## Propuesta de solución  💡
 Si tienes una idea de cómo implementar esta característica, descríbela aquí.
 
 ---
 
-## Alternativas consideradas (opcional) 🔄
-Menciona si has considerado otras formas de resolver el problema o si existe una solución alternativa actual.
-
----
-
-## Prioridad 🔥
-Selecciona la prioridad de esta solicitud:
+## Dificultad 🔥
+Selecciona la dificultad de esta solicitud:
 - [ ] Baja
 - [ ] Media
 - [ ] Alta
