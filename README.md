@@ -1,5 +1,5 @@
 # ☁SQLCloud
-:rocket: El futuro del almacenamiento de datos en la nube y hosting de bases de datos. :rocket:
+:rocket: El futuro del almacenamiento de datos en la nube y hosting de bases de datos. Para equipos sin soporte. :rocket:
 
 ## 📑Índice
 
