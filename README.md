@@ -10,7 +10,7 @@
 
 * [Índice](#Índice)
 
-* [Descripción del proyecto](#descripción-del-proyecto)
+* [Descripción del proyecto](#descripción)
 
 * [Estado del proyecto](#Estado-del-proyecto)
 
@@ -24,9 +24,20 @@
 
 * [Licencia](https://github.com/DanieBarrio/ProyectoASIRTFG/blob/main/LICENSE)
 
-* [Diagrama](#conclusión)
+* [Diagrama](#Diagrama)
 
 * [Autores](#Autores)
+
+## Descripción
+
+Esto es un proyecto como trabajo de final de ciclo para el instituto IES Antonio Machado. El proyecto se basa en dar un servicio de hosting de base de datos para nuestros clientes, la tecnología que necesiten una solución accesible, segura y eficiente para gestionar sus datos en la nube.  
+
+El servicio permite a los usuarios alojar, administrar y acceder a bases de datos SQL desde cualquier lugar, ofreciendo características copias de seguridad, seguridad y adaptavilidad a los proyectos. Además, el proyecto incluye una interfaz intuitiva que facilita la configuración y el uso del servicio, incluso para aquellos con conocimientos básicos de administración de bases de datos. 
+
+Tambien puedes elegir la opcion de hostear una pagina web con nuestras bases de datos.
+
+## Tenologías utilizadas
+
 
 ## Estado del proyecto
 
