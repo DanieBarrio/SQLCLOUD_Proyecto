@@ -32,7 +32,7 @@
 
 * [Diagrama](#conclusión)
 
-* [Autores](##Autores)
+* [Autores](#Autores)
 
 ## Autores
 
