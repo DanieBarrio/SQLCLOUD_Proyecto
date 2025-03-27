@@ -45,5 +45,7 @@ La GPL v2.0 es una licencia de software libre que garantiza la libertad de usar,
 
 ## 👥 Autores
 
-| ![Daniel Barrio Domínguez](https://avatars.githubusercontent.com/u/145673109?v=4){width=115 style="border-radius: 50%;"}<br>[@DanieBarrio](https://github.com/DanieBarrio) | ![David Jimenez Ruiz](https://avatars.githubusercontent.com/u/145720278?v=4){width=115 style="border-radius: 50%;"}<br>[@Davidjimenez05](https://github.com/Davidjimenez05) |
+## 👥 Autores
+
+| <div align="center"><a href="https://github.com/DanieBarrio"><img src="https://avatars.githubusercontent.com/u/145673109?v=4" width="115"/><br><sub><strong>Daniel Barrio Domínguez 🧑‍💻</strong></sub></a></div> | <div align="center"><a href="https://github.com/Davidjimenez05"><img src="https://avatars.githubusercontent.com/u/145720278?v=4" width="115"/><br><sub><strong>David Jimenez Ruiz 🧑‍💻</strong></sub></a></div> |
 |:-----------------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------:|
