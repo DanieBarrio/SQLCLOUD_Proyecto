@@ -31,3 +31,8 @@
 * [Licencia](#licencia)
 
 * [Conclusión](#conclusión)
+
+
+## Autores
+
+| [<img src="https://avatars.githubusercontent.com/u/145673109?v=4" width=115><br><sub>Daniel Barrio Domínguez</sub>](https://github.com/DanieBarrio) |  [<img src="https://avatars.githubusercontent.com/u/71970858?v=4" width=115><br><sub>Ellen Pimentel</sub>]([https://github.com/guilhermeonrails](https://github.com/ellenpimentel)) | 
