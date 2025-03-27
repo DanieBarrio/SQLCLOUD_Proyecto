@@ -1,7 +1,7 @@
 ---
-name: ✨ Solicitud de Característica
+name: ✨ Característica a implementar
 about: Usa esta plantilla para solicitar nuevas funcionalidades o mejoras.
-title: "[FEATURE] Breve descripción de la solicitud"
+title: "[PROXIMAMENTE] Breve descripción de la solicitud"
 labels: enhancement, feature
 assignees: []
 ---
