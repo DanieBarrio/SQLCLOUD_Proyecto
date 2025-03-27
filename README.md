@@ -8,8 +8,6 @@
 
 * [Título](#Proyecto-ASIR)
 
-* [Insignias](#insignias)
-
 * [Índice](#Índice)
 
 * [Descripción del proyecto](#descripción-del-proyecto)
