@@ -20,7 +20,7 @@
 
 * [Estado del proyecto](#Estado-del-proyecto)
 
-* [Licencia](https://github.com/DanieBarrio/ProyectoASIRTFG/blob/main/LICENSE)
+* [Licencia](#Licencia)
 
 * [Diagrama](#Diagrama)
 
