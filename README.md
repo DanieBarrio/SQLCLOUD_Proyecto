@@ -36,10 +36,10 @@
   <img src="https://img.shields.io/badge/STATUS-EMPEZANDO-yellow">
 </p>
 
-## Licencia 📄
+## Licencia 📜
 
-Este proyecto está bajo la [Licencia MIT](https://github.com/DanieBarrio/ProyectoASIRTFG/blob/main/LICENSE). 
-Asegúrate de leerla antes de usar o redistribuir cualquier parte del código.
+Este proyecto está bajo la [GNU General Public License v2.0](https://github.com/DanieBarrio/ProyectoASIRTFG/blob/main/LICENSE).  
+La GPL v2.0 es una licencia de software libre que garantiza la libertad de usar, modificar y distribuir el código, siempre que se respeten las mismas libertades en las distribuciones derivadas.
 
 ## Autores
 
