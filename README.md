@@ -11,7 +11,7 @@
 * [Tecnologías utilizadas](#Tecnologías-utilizadas) 💻
 * [Estado del proyecto](#Estado-del-proyecto) 🚧
 * [Licencia](#Licencia) 📜
-* [Diagrama](#Diagrama) 🖥️
+* [Diagrama](#Diagrama) 
 * [Autores](#Autores) 👥
 
 ## 📝Descripción
