@@ -1,9 +1,7 @@
 # ProyectoASIRTFG
 :zap: Proyecto de Hosting de Base de datos con y sin Headers :zap:
 
-<p align="left">
-  <img src="https://img.shields.io/badge/STATUS-EN%20DESAROLLO-green">
-</p>
+
 
 
 ## Índice
@@ -24,15 +22,19 @@
 
 * [Tecnologías utilizadas](#tecnologías-utilizadas)
 
-* [Personas Contribuyentes](#personas-contribuyentes)
-
-* [Personas-Desarrolladores del Proyecto](#personas-desarrolladores)
+* [Estado del proyecto](#Estado-del-proyecto)
 
 * [Licencia](https://github.com/DanieBarrio/ProyectoASIRTFG/blob/main/LICENSE)
 
 * [Diagrama](#conclusión)
 
 * [Autores](#Autores)
+
+## Estado
+
+<p align="left">
+  <img src="https://img.shields.io/badge/STATUS-EMPEZANDO-green">
+</p>
 
 ## Autores
 
