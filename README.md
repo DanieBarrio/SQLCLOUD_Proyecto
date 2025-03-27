@@ -1,7 +1,5 @@
 # ProyectoASIRTFG
-Proyecto realizado junto a la colaboración de Daniel Barrio Domínguez y David Jiménez Ruiz
-
-
+:construction: Proyecto de Hosting de Base de datos con y sin Headers :construction:
 
 <p align="left">
   <img src="https://img.shields.io/badge/STATUS-EN%20DESAROLLO-green">
