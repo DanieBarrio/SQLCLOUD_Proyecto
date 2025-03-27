@@ -1,4 +1,4 @@
-# ProyectoASIRTFG
+# Proyecto ASIR
 :zap: Proyecto de Hosting de Base de datos con y sin Headers :zap:
 
 
@@ -6,7 +6,7 @@
 
 ## Índice
 
-* [Título](#ProyectoASIRTFG)
+* [Título](#Proyecto-ASIR)
 
 * [Insignias](#insignias)
 
@@ -35,6 +35,11 @@
 <p align="left">
   <img src="https://img.shields.io/badge/STATUS-EMPEZANDO-yellow">
 </p>
+
+## Licencia 📄
+
+Este proyecto está bajo la [Licencia MIT](https://github.com/DanieBarrio/ProyectoASIRTFG/blob/main/LICENSE). 
+Asegúrate de leerla antes de usar o redistribuir cualquier parte del código.
 
 ## Autores
 
