@@ -28,7 +28,7 @@
 
 * [Personas-Desarrolladores del Proyecto](#personas-desarrolladores)
 
-* [Licencia]([#licencia](https://github.com/DanieBarrio/ProyectoASIRTFG/blob/main/LICENSE))
+* [Licencia]([https://github.com/DanieBarrio/ProyectoASIRTFG/blob/main/LICENSE])
 
 * [Conclusión](#conclusión)
 
