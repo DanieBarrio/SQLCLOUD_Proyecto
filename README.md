@@ -34,7 +34,7 @@ El servicio permite a los usuarios alojar, administrar y acceder a bases de dato
 
 Tambien puedes elegir la opcion de hostear una pagina web con nuestras bases de datos.
 
-## Tenologías utilizadas
+## Tecnologías utilizadas
 * SQL
 * Kubernetes
 * AWS
