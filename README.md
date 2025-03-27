@@ -20,7 +20,7 @@
 
 * [Estado del proyecto](#Estado-del-proyecto)
 
-* [Licencia](#Licencia-📜)
+* [Licencia](#Licencia)
 
 * [Diagrama](#Diagrama)
 
@@ -47,7 +47,7 @@ Tambien puedes elegir la opcion de hostear una pagina web con nuestras bases de 
   <img src="https://img.shields.io/badge/STATUS-EMPEZANDO-yellow">
 </p>
 
-## Licencia 📜
+## Licencia
 
 Este proyecto está bajo la [GNU General Public License v2.0](https://github.com/DanieBarrio/ProyectoASIRTFG/blob/main/LICENSE).  
 La GPL v2.0 es una licencia de software libre que garantiza la libertad de usar, modificar y distribuir el código, siempre que se respeten las mismas libertades en las distribuciones derivadas.
