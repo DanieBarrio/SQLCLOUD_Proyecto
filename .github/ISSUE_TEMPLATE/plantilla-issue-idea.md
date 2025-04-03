@@ -17,7 +17,14 @@ Si tienes una idea de cómo implementar esta característica, descríbela aquí.
 ---
 
 ## Dificultad 🔥
-Selecciona la prioridad de esta solicitud:
-- [ ] Baja
+Selecciona la dificultad de esta solicitud:
+- [x] Baja
 - [ ] Media
 - [ ] Alta
+
+## Tiempo ⏱️
+Selecciona el tiempo de desarrollo de esta solicitud:
+- [x] Bajo
+- [ ] Medio
+- [ ] Alto
+
