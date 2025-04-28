@@ -38,7 +38,7 @@ Para acceder al proyecto busque [sqlcloud.site](https://www.sqlcloud.site/indexa
 ## 🚧Estado del proyecto
 
 <p align="left">
-  <img src="https://img.shields.io/badge/STATUS-EMPEZANDO-yellow">
+  <img src="https://img.shields.io/badge/STATUS-INDEXANDO-blue">
 </p>
 
 ## 📜Licencia
