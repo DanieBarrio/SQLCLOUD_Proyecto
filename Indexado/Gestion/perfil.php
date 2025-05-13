@@ -1,10 +1,12 @@
 <?php
-
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 session_start();
 require 'funciones.php';
-require 'conexion.php';
+require_once 'conexion.php';
 
-// Verificar inactividad y CSRF
+// Verificamos inactividad y CSRF
 if (isset($_SESSION["ultimo_acceso"])) {
     $inactividad = 3600; 
     if (time() - $_SESSION["ultimo_acceso"] > $inactividad) {
@@ -14,20 +16,27 @@ if (isset($_SESSION["ultimo_acceso"])) {
     }
 }
 $_SESSION["ultimo_acceso"] = time();
+sinlogin();
 
-// Procesar actualización de perfil
+// Procesamos actualización de perfil
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
     $error = null;
     $conn = conectar();
     
-    // Obtener datos del formulario
+    // Obtenemos y sanitizamos datos del formulario
     $usuario_original = $_SESSION['USUARIO'];
-    $nuevo_usuario = trim($_POST['usuario']);
-    $nuevo_nombre = trim($_POST['nombreCompleto']);
-    $nuevo_correo = trim($_POST['correo']);
-    $password_actual = $_POST['password_actual'];
+    $nuevo_usuario = filter_input(INPUT_POST, 'usuario', FILTER_SANITIZE_SPECIAL_CHARS);
+    $nuevo_nombre = filter_input(INPUT_POST, 'nombreCompleto', FILTER_SANITIZE_SPECIAL_CHARS);
+    $nuevo_correo = filter_input(INPUT_POST, 'correo', FILTER_SANITIZE_EMAIL);
+    $password_actual = filter_input(INPUT_POST, 'password_actual', FILTER_SANITIZE_SPECIAL_CHARS);
 
-    // 1. Verificar contraseña actual
+    // Aplicar trim()
+    $nuevo_usuario = trim($nuevo_usuario);
+    $nuevo_nombre = trim($nuevo_nombre);
+    $nuevo_correo = trim($nuevo_correo);
+    $password_actual = trim($password_actual);
+
+    // 1. Verificamos contraseña actual
     $stmt = $conn->prepare("SELECT CONTRASENA FROM usuarios WHERE USUARIO = ?");
     $stmt->bind_param("s", $usuario_original);
     $stmt->execute();
@@ -43,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
         }
     }
 
-    // 2. Verificar si el nuevo usuario ya existe
+    // 2. Verificamos si el nuevo usuario ya existe
     if ($nuevo_usuario !== $usuario_original) {
         $stmt = $conn->prepare("SELECT USUARIO FROM usuarios WHERE USUARIO = ?");
         $stmt->bind_param("s", $nuevo_usuario);
@@ -56,12 +65,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
         }
     }
 
-    // 3. Actualizar datos en la base de datos
+    // 3. Actualizamos datos en la base de datos
     $stmt = $conn->prepare("UPDATE usuarios SET USUARIO = ?, NOMBRE = ?, CORREO = ? WHERE USUARIO = ?");
     $stmt->bind_param("ssss", $nuevo_usuario, $nuevo_nombre, $nuevo_correo, $usuario_original);
     
     if ($stmt->execute()) {
-        // Actualizar datos en sesión
+        // Actualizar datos en sesión (sanitizados previamente)
         $_SESSION['USUARIO'] = $nuevo_usuario;
         $_SESSION['NOMBRE_COMPLETO'] = $nuevo_nombre;
         $_SESSION['CORREO'] = $nuevo_correo;
@@ -82,7 +91,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
-    <!-- Estilos para modo oscuro -->
     <style>
         body.dark-mode {
             background-color: #1a1a1a;
@@ -100,11 +108,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
         .dark-mode .dropdown-item:hover {
             background-color: #444 !important;
         }
+        .modal-content {
+            background-color: var(--bs-modal-bg);
+            color: var(--bs-modal-color);
+        }
+        
+        .modal-header {
+            border-bottom: var(--bs-modal-header-border-width) solid var(--bs-modal-header-border-color);
+        }
+        
+        .modal-footer {
+            border-top: var(--bs-modal-footer-border-width) solid var(--bs-modal-footer-border-color);
+        }
+        .dark-mode .modal-content {
+            background-color: #2d2d2d;
+            color: #ffffff;
+        }
+        
+        .dark-mode .modal-header,
+        .dark-mode .modal-footer {
+            border-color: #404040;
+        }
+        .campo-inactivo {
+            background-color: #f8f9fa !important;
+            color: #6c757d !important;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
 <body class="<?php echo isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light-mode'; ?>">
-    <!-- Script temprano para aplicar el tema antes de renderizar contenido -->
     <script>
         // Aplicar tema desde localStorage si existe
         const savedTheme = localStorage.getItem('theme') || 'light-mode';
@@ -114,7 +147,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
         }
     </script>
 
-    <!-- Modal Verificación Contraseña -->
     <div class="modal fade" id="modalVerificacion" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -184,19 +216,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
                 
                 <div class="mb-3">
                     <label for="usuario" class="form-label">Usuario</label>
-                    <input type="text" class="form-control" name="usuario" id="usuario" 
+                    <input type="text" class="form-control campo-inactivo" name="usuario" id="usuario" 
                            value="<?= htmlspecialchars($_SESSION['USUARIO'] ?? '') ?>" readonly>
                 </div>
                 
                 <div class="mb-3">
                     <label for="nombreCompleto" class="form-label">Nombre completo</label>
-                    <input type="text" class="form-control" name="nombreCompleto" id="nombreCompleto" 
+                    <input type="text" class="form-control campo-inactivo" name="nombreCompleto" id="nombreCompleto" 
                            value="<?= htmlspecialchars($_SESSION['NOMBRE_COMPLETO'] ?? '') ?>" readonly>
                 </div>
                 
                 <div class="mb-4">
                     <label for="correo" class="form-label">Correo electrónico</label>
-                    <input type="email" class="form-control" name="correo" id="correo" 
+                    <input type="email" class="form-control campo-inactivo" name="correo" id="correo" 
                            value="<?= htmlspecialchars($_SESSION['CORREO'] ?? '') ?>" readonly>
                 </div>
 
@@ -225,87 +257,123 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Función para alternar entre temas
-        function toggleTheme(theme) {
-            document.body.className = theme;
-            localStorage.setItem('theme', theme);
-
-            const lightItem = document.getElementById('light-mode-item');
-            const darkItem = document.getElementById('dark-mode-item');
-
-            lightItem.style.display = (theme === 'light-mode') ? 'none' : '';
-            darkItem.style.display = (theme === 'dark-mode') ? 'none' : '';
+<script>
+    // Tema y estilos
+    function toggleTheme(theme) {
+        document.body.className = theme;
+        localStorage.setItem('theme', theme);
+        
+        // Actualizar tema del modal
+        const modal = document.querySelector('.modal-content');
+        if (modal) {
+            modal.classList.toggle('dark-mode', theme === 'dark-mode');
         }
 
-        // Inicializa estado del menú según tema guardado
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light-mode';
+        // Actualizar visibilidad de opciones
+        document.getElementById('light-mode-item').style.display = 
+            theme === 'light-mode' ? 'none' : '';
+        document.getElementById('dark-mode-item').style.display = 
+            theme === 'dark-mode' ? 'none' : '';
+    }
 
-            const lightItem = document.getElementById('light-mode-item');
-            const darkItem = document.getElementById('dark-mode-item');
+    // Inicialización del tema
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme') || 'light-mode';
+        document.body.className = savedTheme;
+        toggleTheme(savedTheme);
+    });
 
-            if (savedTheme === 'light-mode') {
-                lightItem.style.display = 'none';
-                darkItem.style.display = '';
-            } else {
-                darkItem.style.display = 'none';
-                lightItem.style.display = '';
-            }
-        });
+    // Gestión del formulario
+    const editarBtn = document.getElementById('editarBtn');
+    const cancelarBtn = document.getElementById('cancelarBtn');
+    const accionesEdicion = document.getElementById('accionesEdicion');
+    const inputs = document.querySelectorAll('#perfilForm input:not([type="hidden"])');
+    const modalVerificacion = new bootstrap.Modal('#modalVerificacion');
+    let submitting = false;
 
-        // Resto del código existente (manejo de formulario y edición)
-        const editarBtn = document.getElementById('editarBtn');
-        const enviarBtn = document.getElementById('enviarBtn');
-        const cancelarBtn = document.getElementById('cancelarBtn');
-        const accionesEdicion = document.getElementById('accionesEdicion');
-        const inputs = document.querySelectorAll('#perfilForm input:not([type="hidden"])');
-        const modalVerificacion = new bootstrap.Modal('#modalVerificacion');
-        let submitting = false;
+    // Valores originales y estado inicial
+    const valoresOriginales = {};
+    inputs.forEach(input => {
+        valoresOriginales[input.id] = input.value;
+        input.classList.add('campo-inactivo'); // Estado inicial gris
+    });
 
-        const valoresOriginales = {};
+    // Eventos
+    editarBtn.addEventListener('click', () => {
         inputs.forEach(input => {
-            valoresOriginales[input.id] = input.value;
+            input.readOnly = false;
+            input.classList.replace('campo-inactivo', 'campo-activo');
         });
+        editarBtn.classList.add('d-none');
+        accionesEdicion.classList.remove('d-none');
+    });
 
-        editarBtn.addEventListener('click', () => {
-            inputs.forEach(input => {
-                input.readOnly = false;
-                input.classList.remove('bg-light');
-            });
-            editarBtn.classList.add('d-none');
-            accionesEdicion.classList.remove('d-none');
+    cancelarBtn.addEventListener('click', () => {
+        inputs.forEach(input => {
+            input.value = valoresOriginales[input.id];
+            input.readOnly = true;
+            input.classList.replace('campo-activo', 'campo-inactivo');
         });
+        accionesEdicion.classList.add('d-none');
+        editarBtn.classList.remove('d-none');
+        modalVerificacion.hide();
+        
+        // Limpiar posibles campos ocultos previos
+        const existingHidden = document.querySelector('input[name="password_actual"]');
+        if (existingHidden) existingHidden.remove();
+    });
 
-        document.getElementById('perfilForm').addEventListener('submit', (e) => {
-            if (!submitting) {
-                e.preventDefault();
-                modalVerificacion.show();
+    // Validación de envío
+    document.getElementById('perfilForm').addEventListener('submit', (e) => {
+        if (!submitting) {
+            e.preventDefault();
+            
+            // Detección de cambios reales
+            const cambios = Array.from(inputs).some(input => 
+                input.value.trim() !== valoresOriginales[input.id].trim()
+            );
+
+            if (!cambios) {
+                alert('No se detectaron cambios para guardar.');
+                submitting = false;
+                return; // Salir inmediatamente
+            }
+            
+            modalVerificacion.show();
+        }
+    });
+
+    // Verificación final
+    document.getElementById('confirmarVerificacion').addEventListener('click', () => {
+        const passwordInput = document.getElementById('password_actual');
+        const password = passwordInput.value.trim();
+        
+        // Validación básica en cliente
+        if (password.length < 8) {
+            alert('La contraseña debe tener al menos 8 caracteres');
+            passwordInput.focus();
+            return;
+        }
+
+        // Sanitización avanzada
+        inputs.forEach(input => {
+            if (input.name === 'correo') {
+                input.value = input.value.replace(/[^\w@.-]/gi, '');
+            } else {
+                input.value = input.value.replace(/[^\p{L}\s]/gu, '');
             }
         });
 
-        document.getElementById('confirmarVerificacion').addEventListener('click', () => {
-            const password = document.getElementById('password_actual').value;
-            const hiddenPassword = document.createElement('input');
-            hiddenPassword.type = 'hidden';
-            hiddenPassword.name = 'password_actual';
-            hiddenPassword.value = password;
-            document.getElementById('perfilForm').appendChild(hiddenPassword);
-            
-            submitting = true;
-            document.getElementById('perfilForm').submit();
-        });
+        // Inyectar contraseña
+        const hiddenPassword = document.createElement('input');
+        hiddenPassword.type = 'hidden';
+        hiddenPassword.name = 'password_actual';
+        hiddenPassword.value = password;
+        document.getElementById('perfilForm').appendChild(hiddenPassword);
 
-        cancelarBtn.addEventListener('click', () => {
-            inputs.forEach(input => {
-                input.value = valoresOriginales[input.id];
-                input.readOnly = true;
-                input.classList.add('bg-light');
-            });
-            accionesEdicion.classList.add('d-none');
-            editarBtn.classList.remove('d-none');
-            modalVerificacion.hide();
-        });
-    </script>
+        submitting = true;
+        document.getElementById('perfilForm').submit();
+    });
+</script>
 </body>
 </html>

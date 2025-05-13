@@ -1,10 +1,10 @@
 <?php
     
 // Función de ejemplo para autenticación (debes implementarla de forma segura)
-    function Existeusuario($usuario, $correo, $password, $conn) {
+    function Existeusuario($usuario, $password, $conn) {
         
         $stmt = $conn->prepare("SELECT USUARIO, NOMBRE, CORREO, CONTRASENA, ROL FROM usuarios WHERE USUARIO = ? OR CORREO = ?"); // El interrogante es una forma de evitar la inyeccion sql 
-        $stmt->bind_param("ss", $usuario, $correo); // vinculamos el interrogante con el usuario
+        $stmt->bind_param("ss", $usuario, $usuario); // vinculamos el interrogante con el usuario
         $stmt->execute();
         $respuesta = false;
 
@@ -93,7 +93,7 @@
         exit;
     }
     
-    require 'conexion.php';
+    require_once 'conexion.php';
     $conn = conectar();
     
     $stmt = $conn->prepare("SELECT TOKEN FROM TOKEN WHERE TOKEN = ?");
@@ -108,7 +108,7 @@
         header("Location: login.php");
         exit;
     }
-}
+    }
 
     function csrfcomprovacion($tokennew, $tokenold) {
         if ($tokennew !== $tokenold) {

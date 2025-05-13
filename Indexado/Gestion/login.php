@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Por favor, ingrese usuario y contraseña.";
     } else {
         $conn = conectar();
-        if (Existeusuario($usuario, $usuario, $password, $conn)) { 
+        if (Existeusuario($usuario, $password, $conn)) { 
             session_regenerate_id(true); // Regenerar ID de sesión por seguridad
 
             $token = bin2hex(random_bytes(32));
