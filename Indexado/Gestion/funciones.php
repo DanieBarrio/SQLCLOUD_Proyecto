@@ -1,5 +1,5 @@
 <?php
-    // Función de ejemplo para autenticación (debes implementarla de forma segura)
+    // Función de ejemplo para autenticación (debes implementarla de forma segura.)
     function Existeusuario($usuario, $password, $conn) {
         //Para esta funcion vamos a hacer lo siguiente: vemos que el usuario/correo que ha puesto esta en la base de datos y luego vemos que la contraseña coincida con la hasheada
         $stmt = $conn->prepare("SELECT USUARIO, NOMBRE, CORREO, CONTRASENA, ROL FROM usuarios WHERE USUARIO = ? OR CORREO = ?");
