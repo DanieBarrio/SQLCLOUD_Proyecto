@@ -3,26 +3,36 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+//iniciamos las sesiones 
 session_start();
+
+//vemos que no lleve mas de 30 minutos sin movimiento
 if (isset($_SESSION["ultimo_acceso"])) {
     $inactividad = 1800; 
     if (time() - $_SESSION["ultimo_acceso"] > $inactividad) {
         session_destroy();
     }
 }
+// en caso de que no hayan pasado los 30m que te ponga de nueo un contador
 $_SESSION["ultimo_acceso"] = time();
 
+//metemos funciones.php
 require 'funciones.php';
 
-
+//Vemos que si entra con el metodo get que es normal ya que se le envia un enlace al usuario con el token y el correo 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     require 'conexion.php';
+
+    //quitamos las comillas y lo igualamos a una variable para su futuro uso
     $email = str_replace('"','', $_GET['email']);
     $token = str_replace('"','', $_GET['token']);
     $conn = conectar();
+
+    //para corroborar que el token y el correo es de el mismmo comparamos las id
     $stmt = $conn->prepare("SELECT TOKEN.TOKEN, usuarios.CORREO FROM TOKEN, usuarios WHERE TOKEN.ID = usuarios.ID and usuarios.CORREO = ? and TOKEN.TOKEN = ? ");
      // El interrogante es una forma de evitar la inyeccion sql 
-    $stmt->bind_param("ss", $email ,$token); // vinculamos el interrogante con el usuario
+    $stmt->bind_param("ss", $email ,$token); 
     $stmt->execute();
     $resultado = $stmt->get_result(); // El resultado del select lo guarda en resutado
     
@@ -31,22 +41,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         header("Location: login.php");
         exit;
     }
-   
-} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    require 'conexion.php'; 
-
+   }
+//si es por el metodo post que es una vez que completa el formulario 
+elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require 'conexion.php';
+    //cogemos los datos del metodo get para posterior uso y del metodo post
     $emailcom = str_replace('"','', $_GET['email']);
     $tokencom = str_replace('"','', $_GET['token']);
     $password = $_POST['password'];
     $password2 = $_POST['password2'];
     $conn = conectar(); 
-    $stmt = $conn->prepare("SELECT TOKEN.TOKEN, usuarios.CORREO FROM TOKEN, usuarios WHERE TOKEN.ID = usuarios.ID and usuarios.CORREO = ? and TOKEN.TOKEN = ? ");
-     // El interrogante es una forma de evitar la inyeccion sql 
-    $stmt->bind_param("ss", $emailcom ,$tokencom); // vinculamos el interrogante con el usuario
+
+    //comprobamos de nuevo el id
+    $stmt = $conn->prepare("SELECT TOKEN.TOKEN, usuarios.CORREO FROM TOKEN, usuarios WHERE TOKEN.ID = usuarios.ID and usuarios.CORREO = ? and TOKEN.TOKEN = ? "); 
+    $stmt->bind_param("ss", $emailcom ,$tokencom);
     $stmt->execute();
     $resultado = $stmt->get_result(); // El resultado del select lo guarda en resutado
     if ($resultado->num_rows === 1) { // Comprueba que solo a devuelto una linea con un solo usuario
-
+	//combrobaciones de la contraseña para comprobar que es seura y igual a la segunda
         if ($password !== $password2) {
             $mensaje = "Las contraseñas no coinciden.";
         } elseif (
@@ -60,14 +72,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
           else {
             // Hasheamos la contraseña para seguridad
             $hash = password_hash($password, PASSWORD_DEFAULT);
-
+	    //ponemos la contraseña al correo 
             $sql = "UPDATE usuarios SET CONTRASENA = ? WHERE CORREO = ?";
             $stmt = $conn->prepare($sql);
             if ($stmt) {
                 $stmt->bind_param("ss", $hash, $emailcom);
 
                 if ($stmt->execute()) {
-                   
+		    //regeneramos el token para que no pueda volverse a usar
                     $token = bin2hex(random_bytes(32));
                     $usuario = $emailcom;
                     GuardarToken($conn, $token, $usuario);
@@ -76,8 +88,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     session_destroy();
                     header("Location: login.php");
                     exit;
-                 
-                  
                 } else {
                     $mensaje = "Error al cambiar la contraseña ";
                 }
