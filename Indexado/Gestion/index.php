@@ -216,7 +216,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       <div class="bg-gray-800 text-white p-6 rounded-lg shadow-lg">
         <h2 class="text-xl font-semibold mb-4">Estado del Servicio</h2>
-        <p><strong>Plan:</strong> <?= htmlspecialchars($plan) ?></p>
+        <?php
+	$plan = $filaUsuario['plan'] ?? 'gratuito';
+	?>
+    <p><strong>Plan:</strong>
+    	<?= $plan === 'gratuito' ? 'Gratuito' : 'Premium' ?>
+    </p>
+
+	<?php if ($plan !== 'premium'): ?>
+    <a href="upgrade-plan.php" class="mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition inline-block">
+        Mejorar a Plan Premium
+    </a>
+	<?php else: ?>
+    	<p class="text-green-400 mt-4">✅ Tienes acceso premium</p>
+	<?php endif; ?>
         <p><strong>Bases de datos:</strong> 2 activas, 0 pausadas</p>
         <p><strong>Último backup:</strong> 2025-04-03</p>
         <button class="mt-4 bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition">

@@ -19,6 +19,7 @@
             $_SESSION['CORREO'] = $user['CORREO'];
             $_SESSION['ROL'] = $user['ROL'];
             $_SESSION['user'] = $user['USUARIO'];
+	    $_SESSION['plan'] = $user['plan']; // 'gratuito' o 'premium'
 	    //devolvems que el usuario que ha puesto existe y le guardamos sus datos en sesiones
             $respuesta = true;
             }

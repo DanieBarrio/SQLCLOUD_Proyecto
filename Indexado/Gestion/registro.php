@@ -2,12 +2,15 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') { 
-    
+$mensaje = ""; // Inicializa la variable por si no se envía el formulario
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
     session_start();
     session_unset();
     session_destroy();
     session_start();
+
     require 'conexion.php';
 
     $nombre = htmlspecialchars(trim($_POST['nombre']));
@@ -15,47 +18,71 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $correo = htmlspecialchars(trim($_POST['correo']));
     $password = $_POST['password'];
     $password2 = $_POST['password2'];
-    $conn = conectar();     // Conectamos usando la función definida
+    $conn = conectar(); // Conectamos usando la función definida
 
     // Validación de datos
-    if (empty($nombre) || empty($correo) || empty($password) || empty($password2)) {
+    if (empty($nombre) || empty($usuario) || empty($correo) || empty($password) || empty($password2)) {
         $mensaje = "Todos los campos son obligatorios.";
     } elseif (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
         $mensaje = "Correo electrónico inválido.";
     } elseif ($password !== $password2) {
         $mensaje = "Las contraseñas no coinciden.";
     } elseif (
-            strlen($password) < 8 ||
-            !preg_match('/[A-Za-z]/', $password) ||
-            !preg_match('/[0-9]/', $password) ||
-            !preg_match('/[!@#$_.,+*&%\-]/', $password)
-        ) {
-            $mensaje = "La contraseña debe tener al menos 8 caracteres, incluir una letra, un número y un símbolo(!@#$_.,+*&%\-).";
-        }
-      else {
-        // Hasheamos la contraseña para seguridad
-        $hash = password_hash($password, PASSWORD_DEFAULT);
+        strlen($password) < 8 ||
+        !preg_match('/[A-Za-z]/', $password) ||
+        !preg_match('/[0-9]/', $password) ||
+        !preg_match('/[!@#$_.,+*&%\-]/', $password)
+    ) {
+        $mensaje = "La contraseña debe tener al menos 8 caracteres, incluir una letra, un número y un símbolo (!@#$_.,+*&%-).";
+    } else {
+        // Verifica si el usuario o correo ya existen
+        $sql_check = "SELECT USUARIO, CORREO FROM usuarios WHERE USUARIO = ? OR CORREO = ?";
+        $stmt_check = $conn->prepare($sql_check);
+        $stmt_check->bind_param("ss", $usuario, $correo);
+        $stmt_check->execute();
+        $result = $stmt_check->get_result();
 
-        // Consulta preparada para evitar inyección SQL
-        $sql = "INSERT INTO usuarios (USUARIO, NOMBRE, CONTRASENA, CORREO) VALUES (?, ?, ?, ?)";
-        $stmt = $conn->prepare($sql);
+        $usuarioExistente = false;
+        $correoExistente = false;
 
-        if ($stmt) {
-            $stmt->bind_param("ssss", $usuario, $nombre, $hash, $correo);
-
-            if ($stmt->execute()) {
-                header("Location: login.php"); // Redirección segura
-                exit;
-            } else {
-                $mensaje = "Error al registrar, usuario ya registrado: ";
+        while ($row = $result->fetch_assoc()) {
+            if ($row['USUARIO'] === $usuario) {
+                $usuarioExistente = true;
             }
-            $stmt->close();
+            if ($row['CORREO'] === $correo) {
+                $correoExistente = true;
+            }
         }
+
+        if ($usuarioExistente && $correoExistente) {
+            $mensaje = "El nombre de usuario y el correo electrónico ya están registrados.";
+        } elseif ($usuarioExistente) {
+            $mensaje = "El nombre de usuario ya está registrado.";
+        } elseif ($correoExistente) {
+            $mensaje = "El correo electrónico ya está registrado.";
+        } else {
+            // Hasheamos la contraseña para seguridad
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+
+            // Insertamos en la base de datos
+            $sql = "INSERT INTO usuarios (USUARIO, NOMBRE, CONTRASENA, CORREO) VALUES (?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+
+            if ($stmt) {
+                $stmt->bind_param("ssss", $usuario, $nombre, $hash, $correo);
+                if ($stmt->execute()) {
+                    header("Location: login.php");
+                    exit;
+                } else {
+                    $mensaje = "Error al registrar el usuario.";
+                }
+                $stmt->close();
+            }
+        }
+
+        $stmt_check->close();
+        $conn->close();
     }
-    
-    // En caso de que alguno de los dos anteriores if de error saldra esto
-    $conn->close();
-   
 }
 ?>
 
