@@ -1,135 +1,110 @@
 <?php
-    // Función de ejemplo para autenticación (debes implementarla de forma segura.)
-    function Existeusuario($usuario, $password, $conn) {
-        //Para esta funcion vamos a hacer lo siguiente: vemos que el usuario/correo que ha puesto esta en la base de datos y luego vemos que la contraseña coincida con la hasheada
-        $stmt = $conn->prepare("SELECT USUARIO, NOMBRE, CORREO, CONTRASENA, ROL FROM usuarios WHERE USUARIO = ? OR CORREO = ?");
-        $stmt->bind_param("ss", $usuario, $usuario);
-        $stmt->execute();
-        $respuesta = false;
+// funciones.php
 
-        $resultado = $stmt->get_result(); // El resultado del select lo guarda en resutado
+function Existeusuario($correo, $password, $conn) {
+    $stmt = $conn->prepare("SELECT NOMBRE, CORREO, CONTRASENA, ROL, PLAN, FECHA_EXPIRACION FROM usuarios WHERE CORREO = ?");
+    $stmt->bind_param("s", $correo);
+    $stmt->execute();
+    $respuesta = false;
 
-        if ($resultado->num_rows === 1) { // Comprueba que solo a devuelto una linea con un solo usuario
-            $user = $resultado->fetch_assoc(); // Guarda los datos de resultado en un array llamado user
+    $resultado = $stmt->get_result();
 
+    if ($resultado->num_rows === 1) {
+        $user = $resultado->fetch_assoc();
 
-            if (password_verify($password, $user['CONTRASENA'])) { //Comprobacion de contraseña aun sin hashear
-            $_SESSION['USUARIO'] = $user['USUARIO'];
+        if (password_verify($password, $user['CONTRASENA'])) {
+            $_SESSION['user'] = $user['CORREO'];
             $_SESSION['NOMBRE_COMPLETO'] = $user['NOMBRE'];
             $_SESSION['CORREO'] = $user['CORREO'];
             $_SESSION['ROL'] = $user['ROL'];
-            $_SESSION['user'] = $user['USUARIO'];
-	    $_SESSION['plan'] = $user['plan']; // 'gratuito' o 'premium'
-	    //devolvems que el usuario que ha puesto existe y le guardamos sus datos en sesiones
+            $_SESSION['PLAN'] = $user['PLAN'];
+            $_SESSION['FECHA_EXPIRACION'] = $user['FECHA_EXPIRACION'];
             $respuesta = true;
-            }
         }
-        return $respuesta;
     }
+    return $respuesta;
+}
 
-
-
-    //Esta funcion sirve para que cuando un usuario se registre/cambie contraseña ponga una contraseña robusta y desigual a su nombre
-    function verificador($password, $nombre){
-        $mensaje = null;
-        if (
-            strlen($password) < 8 ||
-            !preg_match('/[A-Za-z]/', $password) ||
-            !preg_match('/[0-9]/', $password) ||
-            !preg_match('/[!@#$_.,+*&%\-]/', $password)
-        ) {
-            $mensaje = "La contraseña debe tener al menos 8 caracteres, incluir una letra, un número y un símbolo(!@#$._,+*&%\-).";
-        }elseif ( $password == $nombre ){
-            $mensaje = "La contraseña no puede ser el nombre de usuario.";
-        }
-        return $mensaje;
+function verificador($password, $nombre) {
+    $mensaje = null;
+    if (
+        strlen($password) < 8 ||
+        !preg_match('/[A-Za-z]/', $password) ||
+        !preg_match('/[0-9]/', $password) ||
+        !preg_match('/[!@#$_.,+*&%\-]/', $password)
+    ) {
+        $mensaje = "La contraseña debe tener al menos 8 caracteres, incluir una letra, un número y un símbolo(!@#$._,+*&%\-).";
+    } elseif ($password === $nombre) {
+        $mensaje = "La contraseña no puede ser el nombre del usuario.";
     }
+    return $mensaje;
+}
 
+function GuardarToken($conn, $token, $correo) {
+    $stmt = $conn->prepare("SELECT ID FROM usuarios WHERE CORREO = ?");
+    $stmt->bind_param("s", $correo);
+    $stmt->execute();
+    $resultado = $stmt->get_result();
 
+    if ($resultado->num_rows === 1) {
+        $user = $resultado->fetch_assoc();
+        $idusuario = $user['ID'];
 
-    //Esta funcion sive para que este regenerando el token que se guarda en la base de datos.
-    function GuardarToken($conn, $token, $usuario){
-        $stmt = $conn->prepare("SELECT ID FROM usuarios WHERE USUARIO = ? OR CORREO = ?"); // El interrogante es una forma de evitar la inyeccion sql 
-        $stmt->bind_param("ss", $usuario, $usuario); // vinculamos el interrogante con el usuario
+        $stmt = $conn->prepare("SELECT ID FROM TOKEN WHERE ID = ?");
+        $stmt->bind_param("s", $idusuario);
         $stmt->execute();
+        $resultado = $stmt->get_result();
 
-        $resultado = $stmt->get_result(); // El resultado del select lo guarda en resutado
-
-        if ($resultado->num_rows === 1) { // Comprueba que solo a devuelto una linea con un solo usuario
-            $user = $resultado->fetch_assoc(); // Guarda los datos de resultado en un array llamado user
-
-            $idusuario = $user['ID'];
-        }
-        $stmt = $conn->prepare("SELECT ID FROM TOKEN WHERE ID = ?"); // El interrogante es una forma de evitar la inyeccion sql 
-        $stmt->bind_param("s", $idusuario); // vinculamos el interrogante con el usuario
-        $stmt->execute();
-
-        $resultado = $stmt->get_result(); // El resultado del select lo guarda en resutado
-
-        if ($resultado->num_rows === 1) { // Comprueba que solo a devuelto una linea con un solo usuario
-            $user = $resultado->fetch_assoc(); // Guarda los datos de resultado en un array llamado user
-            $sql = "UPDATE TOKEN  SET  TOKEN = ? WHERE ID = ? ";
+        if ($resultado->num_rows === 1) {
+            $sql = "UPDATE TOKEN SET TOKEN = ? WHERE ID = ?";
             $stmt = $conn->prepare($sql);
             if ($stmt) {
                 $stmt->bind_param("ss", $token, $idusuario);
                 $stmt->execute();
             }
         } else {
-            $sql = "INSERT INTO TOKEN (ID, TOKEN) VALUES (?, ?) ";
+            $sql = "INSERT INTO TOKEN (ID, TOKEN) VALUES (?, ?)";
             $stmt = $conn->prepare($sql);
             if ($stmt) {
-                $stmt->bind_param("ss", $idusuario , $token);
-
+                $stmt->bind_param("ss", $idusuario, $token);
                 $stmt->execute();
             }
         }
     }
+}
 
-
-
-
-    //esta compureba que n las sesiones tenga
-    function sinlogin() {
-    	if (!isset($_SESSION['user'], $_SESSION['token'], $_SESSION['ROL'])) {
-            header("Location: login.php");
-            exit;
-     	}
-   	require_once 'conexion.php';
-    	$conn = conectar();
-    	$stmt = $conn->prepare("SELECT TOKEN FROM TOKEN WHERE TOKEN = ?");
-    	$stmt->bind_param("s", $_SESSION['token']);
-   	if (!$stmt->execute()) {
-            die("Error al verificar el token: " . $conn->error);
-    	}
-    	$resultado = $stmt->get_result();
-    	if ($resultado->num_rows !== 1) {
-            header("Location: login.php");
-            exit;
-   	}
+function sinlogin() {
+    if (!isset($_SESSION['user'], $_SESSION['token'], $_SESSION['ROL'])) {
+        header("Location: login.php");
+        exit;
     }
-
-
-
-
-
-    //funcion para comprobar los tokens csrf que son validos y regenere este
-    function csrfcomprovacion($tokennew, $tokenold) {
-        if ($tokennew !== $tokenold) {
-            exit;
-        } else {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
+    require_once 'conexion.php';
+    $conn = conectar();
+    $stmt = $conn->prepare("SELECT TOKEN FROM TOKEN WHERE TOKEN = ?");
+    $stmt->bind_param("s", $_SESSION['token']);
+    if (!$stmt->execute()) {
+        die("Error al verificar el token: " . $conn->error);
     }
-
-
-
-    // funcion para que verifique el token y ya me he perdido son muchas funciones y no me acuerdo
-    function VerificarToken($tokenOld, $usuario, $conn) {
-    	if (! isset($_SESSION['csrf_token']) || $_SESSION['csrf_token'] !== $tokenOld) {
-            return false;
-     	}
-    	$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    	return true;
+    $resultado = $stmt->get_result();
+    if ($resultado->num_rows !== 1) {
+        header("Location: login.php");
+        exit;
     }
+}
+
+function csrfcomprovacion($tokennew, $tokenold) {
+    if ($tokennew !== $tokenold) {
+        exit;
+    } else {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+}
+
+function VerificarToken($tokenOld, $correo, $conn) {
+    if (!isset($_SESSION['csrf_token']) || $_SESSION['csrf_token'] !== $tokenOld) {
+        return false;
+    }
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    return true;
+}
 ?>
-

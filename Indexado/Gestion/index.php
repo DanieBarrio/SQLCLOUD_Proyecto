@@ -1,6 +1,6 @@
 <?php
 // -------------------------------------
-// index.php (versión corregida 20 de mayo de 2025)
+// index.php (versión corregida 27 de mayo de 2025)
 // -------------------------------------
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -13,17 +13,36 @@ require 'funciones.php';
 
 // 1) Si no hay usuario en sesión, redirige a login
 if (!isset($_SESSION['user'])) {
-    header('Location: login.php');
+    header('Location: logister.php');
     exit;
 }
 
-// 2) Generar token CSRF si aún no existe
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    // Atención: el formulario de perfil usará este valor
+// 2) Recargar datos del usuario desde la base de datos para mostrarlos en el modal
+$connUser = conectar();
+$stmt = $connUser->prepare("SELECT NOMBRE, CORREO, PLAN, FECHA_EXPIRACION FROM usuarios WHERE CORREO = ?");
+$stmt->bind_param("s", $_SESSION['user']);
+$stmt->execute();
+$resultado = $stmt->get_result();
+if ($resultado->num_rows === 1) {
+    $fila = $resultado->fetch_assoc();
+    $_SESSION['NOMBRE_COMPLETO']   = $fila['NOMBRE'];
+    $_SESSION['CORREO']            = $fila['CORREO'];
+    $_SESSION['PLAN']              = $fila['PLAN'];
+    $_SESSION['FECHA_EXPIRACION']  = $fila['FECHA_EXPIRACION'];
 }
 
-// Guardamos en una variable PHP si hay alerta para el modal
+// Mostrar fecha de expiración (si aplica)
+if (!empty($_SESSION['FECHA_EXPIRACION'])) {
+    $fecha_exp = DateTime::createFromFormat('Y-m-d', $_SESSION['FECHA_EXPIRACION']);
+    $_SESSION['FECHA_EXPIRACION_FORMATO'] = $fecha_exp ? $fecha_exp->format('d/m/Y') : 'No disponible';
+}
+
+// 3) Generar token CSRF si aún no existe
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Guardamos si hay alerta para el modal
 $tieneAlerta = isset($_SESSION['error']) || isset($_SESSION['exito']);
 
 // -------------------------------------
@@ -32,29 +51,28 @@ $tieneAlerta = isset($_SESSION['error']) || isset($_SESSION['exito']);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
     $conn2 = conectar();
 
-    // 1. Verificar CSRF y eliminar el token para que no se reutilice
+    // 1. Verificar CSRF y regenerar token
     $tokenRecibido = $_POST['csrf_token'] ?? '';
     if (!VerificarToken($tokenRecibido, $_SESSION['user'], $conn2)) {
-        // Si falla CSRF, destruyo sesión y redirijo a login
         session_unset();
         session_destroy();
-        header('Location: login.php');
+        header('Location: logister.php');
         exit;
     }
     unset($_SESSION['csrf_token']);
 
     // 2. Obtener y sanitizar datos del formulario
-    $usuario_original = $_SESSION['user'];
-    $nuevo_usuario   = trim(filter_input(INPUT_POST, 'usuario', FILTER_SANITIZE_SPECIAL_CHARS));
-    $nuevo_nombre    = trim(filter_input(INPUT_POST, 'nombreCompleto', FILTER_SANITIZE_SPECIAL_CHARS));
-    $nuevo_correo    = trim(filter_input(INPUT_POST, 'correo', FILTER_SANITIZE_EMAIL));
-    $password_actual = trim(filter_input(INPUT_POST, 'password_actual', FILTER_SANITIZE_SPECIAL_CHARS));
+    $correo_original  = $_SESSION['user'];
+    $nuevo_nombre     = trim(filter_input(INPUT_POST, 'nombreCompleto', FILTER_SANITIZE_SPECIAL_CHARS));
+    $nuevo_correo     = trim(filter_input(INPUT_POST, 'correo', FILTER_SANITIZE_EMAIL));
+    $password_actual  = trim(filter_input(INPUT_POST, 'password_actual', FILTER_SANITIZE_SPECIAL_CHARS));
 
     // 3. Verificar contraseña actual
-    $stmt = $conn2->prepare("SELECT CONTRASENA FROM usuarios WHERE USUARIO = ?");
-    $stmt->bind_param("s", $usuario_original);
+    $stmt = $conn2->prepare("SELECT CONTRASENA FROM usuarios WHERE CORREO = ?");
+    $stmt->bind_param("s", $correo_original);
     $stmt->execute();
     $resultado = $stmt->get_result();
+
     if ($resultado->num_rows === 1) {
         $filaUsuario = $resultado->fetch_assoc();
         if (!password_verify($password_actual, $filaUsuario['CONTRASENA'])) {
@@ -68,28 +86,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
         exit;
     }
 
-    // 4. Verificar si el nuevo nombre de usuario ya existe (si cambió)
-    if ($nuevo_usuario !== $usuario_original) {
-        $stmt2 = $conn2->prepare("SELECT USUARIO FROM usuarios WHERE USUARIO = ?");
-        $stmt2->bind_param("s", $nuevo_usuario);
+    // 4. Verificar si el nuevo correo ya existe (si cambió)
+    if ($nuevo_correo !== $correo_original) {
+        $stmt2 = $conn2->prepare("SELECT CORREO FROM usuarios WHERE CORREO = ?");
+        $stmt2->bind_param("s", $nuevo_correo);
         $stmt2->execute();
         if ($stmt2->get_result()->num_rows > 0) {
-            $_SESSION['error'] = "El nombre de usuario ya está en uso";
+            $_SESSION['error'] = "El correo ya está en uso";
             header("Location: index.php");
             exit;
         }
     }
 
     // 5. Actualizar datos en la BD
-    $stmt3 = $conn2->prepare("UPDATE usuarios SET USUARIO = ?, NOMBRE = ?, CORREO = ? WHERE USUARIO = ?");
-    $stmt3->bind_param("ssss", $nuevo_usuario, $nuevo_nombre, $nuevo_correo, $usuario_original);
+    $stmt3 = $conn2->prepare("UPDATE usuarios SET NOMBRE = ?, CORREO = ? WHERE CORREO = ?");
+    $stmt3->bind_param("sss", $nuevo_nombre, $nuevo_correo, $correo_original);
+
     if ($stmt3->execute()) {
-        // Actualizo sesión (incluyendo 'user' para todas las validaciones)
-        $_SESSION['user']            = $nuevo_usuario;
-        $_SESSION['USUARIO']         = $nuevo_usuario;
-        $_SESSION['NOMBRE_COMPLETO'] = $nuevo_nombre;
-        $_SESSION['CORREO']          = $nuevo_correo;
-        $_SESSION['exito']           = "Datos actualizados correctamente";
+        // Refrescar correo en sesión
+        $_SESSION['user'] = $nuevo_correo;
+
+        // Recargar datos desde la base de datos
+        $stmt = $conn2->prepare("SELECT NOMBRE, CORREO, PLAN, FECHA_EXPIRACION FROM usuarios WHERE CORREO = ?");
+        $stmt->bind_param("s", $_SESSION['user']);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        if ($resultado->num_rows === 1) {
+            $fila = $resultado->fetch_assoc();
+            $_SESSION['NOMBRE_COMPLETO']   = $fila['NOMBRE'];
+            $_SESSION['CORREO']            = $fila['CORREO'];
+            $_SESSION['PLAN']              = $fila['PLAN'];
+            $_SESSION['FECHA_EXPIRACION']  = $fila['FECHA_EXPIRACION'];
+            $fecha_exp = DateTime::createFromFormat('Y-m-d', $_SESSION['FECHA_EXPIRACION']);
+            $_SESSION['FECHA_EXPIRACION_FORMATO'] = $fecha_exp ? $fecha_exp->format('d/m/Y') : 'No disponible';
+        }
+
+        $_SESSION['exito'] = "Datos actualizados correctamente";
     } else {
         $_SESSION['error'] = "Error al actualizar los datos";
     }
@@ -98,6 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
     exit;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="es" class="<?php echo (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark') ? 'dark' : ''; ?>">
 <head>
@@ -214,28 +247,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
       $plan = "Gratuito";
     ?>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div class="bg-gray-800 text-white p-6 rounded-lg shadow-lg">
-        <h2 class="text-xl font-semibold mb-4">Estado del Servicio</h2>
-        <?php
-	$plan = $filaUsuario['plan'] ?? 'gratuito';
-	?>
-    <p><strong>Plan:</strong>
-    	<?= $plan === 'gratuito' ? 'Gratuito' : 'Premium' ?>
-    </p>
+  <div class="bg-gray-800 text-white p-6 rounded-lg shadow-lg relative">
+    <div class="flex justify-between items-start">
+      <h2 class="text-xl font-semibold mb-4">Estado del Servicio</h2>
 
-	<?php if ($plan !== 'premium'): ?>
-    <a href="upgrade-plan.php" class="mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition inline-block">
-        Mejorar a Plan Premium
-    </a>
-	<?php else: ?>
-    	<p class="text-green-400 mt-4">✅ Tienes acceso premium</p>
-	<?php endif; ?>
-        <p><strong>Bases de datos:</strong> 2 activas, 0 pausadas</p>
-        <p><strong>Último backup:</strong> 2025-04-03</p>
-        <button class="mt-4 bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition">
-          Generar Backup
-        </button>
-      </div>
+      <?php
+        $plan = $_SESSION['PLAN'] ?? 'gratuito';
+        if ($plan !== 'premium'):
+      ?>
+        <!-- Icono de mejora a Premium -->
+        <a href="tarjeta.php" title="Mejorar a Premium"
+           class="text-blue-400 hover:text-blue-300 text-2xl transition duration-200">
+          <i class="fas fa-gem"></i>
+        </a>
+      <?php else: ?>
+        <span class="text-green-400 text-lg" title="Plan Premium Activo">
+          <i class="fas fa-check-circle"></i>
+        </span>
+      <?php endif; ?>
+    </div>
+
+    <p><strong>Plan:</strong> <?= $plan === 'gratuito' ? 'Gratuito' : 'Premium' ?></p>
+    <p><strong>Bases de datos:</strong> 2 activas, 0 pausadas</p>
+    <p><strong>Último backup:</strong> 2025-04-03</p>
+    <button class="mt-4 bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition">
+      Generar Backup
+    </button>
+  </div>
+
       <div class="bg-gray-800 text-white p-6 rounded-lg shadow-lg">
         <h2 class="text-xl font-semibold mb-4">Recursos Usados</h2>
         <div class="space-y-4">
@@ -289,53 +328,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
 
-        <div class="modal-body">
-          <?php if (isset($_SESSION['error'])): ?>
-            <div class="alert alert-danger mb-3"><?= $_SESSION['error']; unset($_SESSION['error']); ?></div>
-          <?php endif; ?>
-          <?php if (isset($_SESSION['exito'])): ?>
-            <div class="alert alert-success mb-3"><?= $_SESSION['exito']; unset($_SESSION['exito']); ?></div>
-          <?php endif; ?>
+<div class="modal-body">
+  <?php if (isset($_SESSION['error'])): ?>
+    <div class="alert alert-danger mb-3"><?= $_SESSION['error']; unset($_SESSION['error']); ?></div>
+  <?php endif; ?>
+  <?php if (isset($_SESSION['exito'])): ?>
+    <div class="alert alert-success mb-3"><?= $_SESSION['exito']; unset($_SESSION['exito']); ?></div>
+  <?php endif; ?>
 
-          <form method="POST" id="perfilFormModal">
-            <!-- Token CSRF -->
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
-            <input type="hidden" name="editar_perfil" value="1">
+  <form method="POST" id="perfilFormModal">
+    <!-- Token CSRF -->
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+    <input type="hidden" name="editar_perfil" value="1">
 
-            <div class="mb-3">
-              <label for="usuarioModal" class="form-label">Usuario</label>
-              <input type="text" class="form-control campo-inactivo" name="usuario" id="usuarioModal"
-                     value="<?= htmlspecialchars($_SESSION['USUARIO'] ?? '') ?>" readonly>
-            </div>
-            <div class="mb-3">
-              <label for="nombreModal" class="form-label">Nombre completo</label>
-              <input type="text" class="form-control campo-inactivo" name="nombreCompleto" id="nombreModal"
-                     value="<?= htmlspecialchars($_SESSION['NOMBRE_COMPLETO'] ?? '') ?>" readonly>
-            </div>
-            <div class="mb-3">
-              <label for="correoModal" class="form-label">Correo electrónico</label>
-              <input type="email" class="form-control campo-inactivo" name="correo" id="correoModal"
-                     value="<?= htmlspecialchars($_SESSION['CORREO'] ?? '') ?>" readonly>
-            </div>
+    <div class="mb-3">
+      <label for="nombreModal" class="form-label">Nombre completo</label>
+      <input type="text" class="form-control campo-inactivo" name="nombreCompleto" id="nombreModal"
+             value="<?= htmlspecialchars($_SESSION['NOMBRE_COMPLETO'] ?? '') ?>" readonly>
+    </div>
+    <div class="mb-3">
+      <label for="correoModal" class="form-label">Correo electrónico</label>
+      <input type="email" class="form-control campo-inactivo" name="correo" id="correoModal"
+             value="<?= htmlspecialchars($_SESSION['CORREO'] ?? '') ?>" readonly>
+    </div>
 
-            <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center">
-              <button type="button" id="editarBtnModal" class="btn btn-primary px-4">
-                <i class="fas fa-edit me-2"></i>Editar
-              </button>
-              <div class="d-none gap-2" id="accionesEdicionModal">
-                <button type="submit" id="enviarBtnModal" class="btn btn-success px-4">
-                  <i class="fas fa-save me-2"></i>Guardar
-                </button>
-                <button type="button" id="cancelarBtnModal" class="btn btn-secondary px-4">
-                  <i class="fas fa-times me-2"></i>Cancelar
-                </button>
-              </div>
-              <a href="cambiar_contrasena.php" class="btn btn-warning px-4">
-                <i class="fas fa-lock me-2"></i>Cambiar Contraseña
-              </a>
-            </div>
-          </form>
-        </div>
+    <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center">
+      <button type="button" id="editarBtnModal" class="btn btn-primary px-4">
+        <i class="fas fa-edit me-2"></i>Editar
+      </button>
+      <div class="d-none gap-2" id="accionesEdicionModal">
+        <button type="submit" id="enviarBtnModal" class="btn btn-success px-4">
+          <i class="fas fa-save me-2"></i>Guardar
+        </button>
+        <button type="button" id="cancelarBtnModal" class="btn btn-secondary px-4">
+          <i class="fas fa-times me-2"></i>Cancelar
+        </button>
+      </div>
+      <a href="cambiar_contrasena.php" class="btn btn-warning px-4">
+        <i class="fas fa-lock me-2"></i>Cambiar Contraseña
+      </a>
+    </div>
+  </form>
+</div>
+
       </div>
     </div>
   </div>
