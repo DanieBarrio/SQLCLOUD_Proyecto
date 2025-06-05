@@ -20,7 +20,6 @@ Esto es un proyecto como trabajo de final de ciclo para el instituto IES Antonio
 
 El servicio permite a los usuarios alojar, administrar y acceder a bases de datos SQL desde cualquier lugar, ofreciendo características copias de seguridad, seguridad y adaptabilidad a los proyectos. Además, el proyecto incluye una interfaz intuitiva que facilita la configuración y el uso del servicio, incluso para aquellos con conocimientos básicos de administración de bases de datos. 
 
-También puedes elegir la opción de hostear una página web con nuestras bases de datos.
 
 ## Acceso al proyecto
 
@@ -30,9 +29,9 @@ Para acceder al proyecto busque [sqlcloud.site](https://www.sqlcloud.site/indexa
 ## 💻Tecnologías utilizadas
 
 * **SQL** 📖 
-* **Kubernetes** 🐳
-* **AWS** ☁
-* **Bacula** 🛡
+* **Docker** 🐳
+* **Hosting Personalizado** ☁
+* **Scripts** 🛡
 * **Pfsense** 🌐
 
 ## 🚧Estado del proyecto
