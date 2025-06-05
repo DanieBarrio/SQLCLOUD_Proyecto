@@ -4,5 +4,5 @@ session_start();
 session_unset();
 session_destroy();
 //redirige al login ya que si no se quedaria en esta pagina para siempre
-header("Location: login.php");
+header("Location: logister.php");
 ?>

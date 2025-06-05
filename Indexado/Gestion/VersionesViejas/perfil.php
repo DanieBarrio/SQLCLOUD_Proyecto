@@ -11,7 +11,7 @@ if (isset($_SESSION["ultimo_acceso"])) {
     $inactividad = 3600; 
     if (time() - $_SESSION["ultimo_acceso"] > $inactividad) {
         session_destroy();
-        header("Location: login.php");
+        header("Location: logister.php");
         exit;
     }
 }
@@ -247,7 +247,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_perfil'])) {
                             </button>
                         </div>
                         
-                        <a href="cambiar_contrasena.php" class="btn btn-warning px-4">
+                        <a href="recuperar.php" class="btn btn-warning px-4">
                             <i class="fas fa-lock me-2"></i>Cambiar Contraseña
                         </a>
                     </div>

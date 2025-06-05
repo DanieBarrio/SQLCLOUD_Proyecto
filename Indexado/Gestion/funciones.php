@@ -75,7 +75,7 @@ function GuardarToken($conn, $token, $correo) {
 
 function sinlogin() {
     if (!isset($_SESSION['user'], $_SESSION['token'], $_SESSION['ROL'])) {
-        header("Location: login.php");
+        header("Location: logister.php");
         exit;
     }
     require_once 'conexion.php';
@@ -87,7 +87,7 @@ function sinlogin() {
     }
     $resultado = $stmt->get_result();
     if ($resultado->num_rows !== 1) {
-        header("Location: login.php");
+        header("Location: logister.php");
         exit;
     }
 }

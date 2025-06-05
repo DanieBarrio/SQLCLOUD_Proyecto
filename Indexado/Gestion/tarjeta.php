@@ -1,34 +1,43 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 session_start();
 require 'conexion.php';
 
 // Verificar sesión activa
 if (!isset($_SESSION['user'])) {
-    header("Location: login.php");
+    header("Location: logister.php");
+    exit;
+}
+
+// Bloquear acceso a usuarios premium
+if (strtolower($_SESSION['PLAN']) === 'premium') {
+    header("Location: index.php"); // O a donde quieras redirigirlos
     exit;
 }
 
 $conn = conectar();
-$stmt = $conn->prepare("SELECT PLAN, FECHA_EXPIRACION FROM usuarios WHERE USUARIO = ?");
+$stmt = $conn->prepare("SELECT p.T_PLAN AS PLAN FROM usuarios u JOIN plan p ON u.ID = p.ID WHERE u.CORREO = ?");
 $stmt->bind_param("s", $_SESSION['user']);
 $stmt->execute();
 $res = $stmt->get_result();
 $datos = $res->fetch_assoc();
 
 $plan = $datos['PLAN'] ?? 'gratuito';
-$fechaExp = $datos['FECHA_EXPIRACION'] ?? null;
 
-if ($plan === 'premium' && $fechaExp && new DateTime() < new DateTime($fechaExp)) {
+if ($plan != 'gratuito') {
     // Ya tiene premium y aún no expira
     header("Location: index.php");
     exit;
 }
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
-  <title>Validación de Tarjeta</title>
+  <title>SQLCLOUD Pago</title>
 <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -407,14 +416,14 @@ if ($plan === 'premium' && $fechaExp && new DateTime() < new DateTime($fechaExp)
         <h2 style="font-size: 26px; margin-bottom: 20px; border-bottom: 2px solid #2d2d2d30; 
                 padding-bottom: 15px; display: flex; align-items: center; gap: 10px;">
             <i class="fas fa-crown" style="color: #2d2d2d;"></i>
-            Plan Premium
+            Plan De Por Vida
         </h2>
 
         <ul style="list-style: none; padding: 0; margin: 0 0 20px 0;">
             <li style="padding: 12px 0; border-bottom: 1px solid rgba(45,45,45,0.1); 
                     display: flex; align-items: center; gap: 10px;">
                 <i class="fas fa-database" style="width: 25px;"></i>
-                Cuota mensual: <strong>100 MB</strong>
+                Cuota Total: <strong>100 MB</strong>
             </li>
             <li style="padding: 12px 0; border-bottom: 1px solid rgba(45,45,45,0.1);
                     display: flex; align-items: center; gap: 10px;">
@@ -423,16 +432,16 @@ if ($plan === 'premium' && $fechaExp && new DateTime() < new DateTime($fechaExp)
             </li>
             <li style="padding: 12px 0; display: flex; align-items: center; gap: 10px;">
                 <i class="fas fa-tag" style="width: 25px;"></i>
-                Precio: <strong style="font-size: 24px;">80 €</strong>
+                Precio: <strong style="font-size: 24px;">900 €</strong>
             </li>
         </ul>
 
         <div style="background: rgba(255,255,255,0.3); padding: 15px; border-radius: 10px;
                  border: 1px solid rgba(45,45,45,0.1);">
-            <strong>Renovación automática:</strong>
+            <strong>Oferta Única Especial</strong>
             <div style="font-size: 14px; margin-top: 8px;">
-                Notificación 3-7 días antes<br>
-                Bases bloqueadas si no se renueva
+                Esta disponible hasta 12/12/2025<br>
+                -Antes de la oferta- 1200 €
             </div>
         </div>
     </div>
@@ -460,8 +469,6 @@ if ($plan === 'premium' && $fechaExp && new DateTime() < new DateTime($fechaExp)
     <button type="submit">Validar tarjeta</button>
   </form>
 
-
-
   <!-- Botón para volver al panel -->
   <div style="text-align: center; width: 100%; margin-top: 30px; padding: 0 20px;">
     <a href="index.php"
@@ -475,12 +482,14 @@ if ($plan === 'premium' && $fechaExp && new DateTime() < new DateTime($fechaExp)
               transition: all 0.3s ease;
               border: 2px solid #D4AF37;
               box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-              cursor: pointer;">
+              cursor: pointer;
+	      position: relative;
+	      z-index: 10;">
         <i class="fas fa-arrow-left" style="margin-right: 8px;"></i>
         Volver al panel
     </a>
   </div>
-</div> <!-- Cierra el div contenedor principal -->
+</div>
 
   <!-- Modal de confirmación -->
   <div class="modal" id="modal-confirm">
@@ -523,35 +532,55 @@ if ($plan === 'premium' && $fechaExp && new DateTime() < new DateTime($fechaExp)
 
     let currentCardType = 'default';
 
-    // Configuración inicial de validación
-    const validations = {
-    cardNumber: value => {
-        const cleaned = value.replace(/\D/g, '');
-        if (!cleaned) return 'El número de tarjeta es requerido';
-        if (!/^[0-9]{13,19}$/.test(cleaned)) return 'Número de tarjeta inválido';
-        if (currentCardType === 'default') return 'Solo aceptamos Visa, Mastercard, American Express y Discover'; // Nueva validación
-        return '';
-    },
-      
-      cardName: value => {
-        if (!value) return 'El nombre es requerido';
-        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{5,}$/.test(value)) return 'Nombre no válido';
-        return '';
-      },
-      
-      cardExp: value => {
-        if (!value) return 'La fecha de expiración es requerida';
-        if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(value)) return 'Formato MM/AA requerido';
-        return '';
-      },
-      
-      cardCvc: value => {
-        const length = currentCardType === 'amex' ? 4 : 3;
-        if (!value) return 'El código de seguridad es requerido';
-        if (value.length !== length) return `El código debe tener ${length} dígitos`;
-        return '';
-      }
-    };
+  const validations = {
+  cardNumber: value => {
+    const cleaned = value.replace(/\D/g, '');
+    if (!cleaned) return 'El número de tarjeta es requerido';
+
+    // Validación por tipo de tarjeta
+    const length = cleaned.length;
+
+    switch (currentCardType) {
+      case 'visa':
+        if (length !== 13 && length !== 16) return 'Visa debe tener 13 o 16 dígitos';
+        break;
+      case 'mastercard':
+        if (length !== 16) return 'MasterCard debe tener 16 dígitos';
+        break;
+      case 'amex':
+        if (length !== 15) return 'American Express debe tener 15 dígitos';
+        break;
+      case 'discover':
+        if (length !== 16) return 'Discover debe tener 16 dígitos';
+        break;
+      case 'default':
+      default:
+        return 'Solo aceptamos Visa, Mastercard, American Express y Discover';
+    }
+
+    return '';
+  },
+
+  cardName: value => {
+    if (!value) return 'El nombre es requerido';
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{5,}$/.test(value)) return 'Nombre no válido';
+    return '';
+  },
+
+  cardExp: value => {
+    if (!value) return 'La fecha de expiración es requerida';
+    if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(value)) return 'Formato MM/AA requerido';
+    return '';
+  },
+
+  cardCvc: value => {
+    const length = currentCardType === 'amex' ? 4 : 3;
+    if (!value) return 'El código de seguridad es requerido';
+    if (value.length !== length) return `El código debe tener ${length} dígitos`;
+    return '';
+  }
+};
+
 
     // Manejo de eventos
     elements.numberInput.addEventListener('input', function(e) {

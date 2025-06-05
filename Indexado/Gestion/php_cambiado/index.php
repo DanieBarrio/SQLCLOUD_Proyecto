@@ -1,72 +1,76 @@
 <?php
-
+// index.php - Versión corregida con roles, límites de bases de datos y redirección a dashboard.php
 session_start();
 require 'conexion.php';
 require 'funciones.php';
 
+// 1. Verificar autenticación
 if (!isset($_SESSION['user'])) {
-    session_unset();
-    session_destroy();
     header('Location: logister.php');
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $tokenRecibido = $_POST['csrf_token'] ?? '';
-    if ($tokenRecibido == "" || $tokenRecibido == $_SESSION['csrf_token']){
-	session_unset();
-        session_destroy();
-        header('Location: logister.php');
-   	exit;
-    }
-}
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-
-
-
 $connUser = conectar();
 
 // 2. Recargar datos del usuario
-$stmt = $connUser->prepare("SELECT u.ID, u.NOMBRE, u.CORREO, u.ROL, p.T_PLAN AS PLAN FROM usuarios u JOIN plan p ON u.ID = p.ID WHERE u.CORREO = ?");
+$stmt = $connUser->prepare("SELECT u.NOMBRE, u.CORREO, u.ROL, p.T_PLAN AS PLAN, p.F_EXPIRACION AS FECHA_EXPIRACION FROM usuarios u JOIN plan p ON u.ID = p.ID WHERE u.CORREO = ?");
 $stmt->bind_param("s", $_SESSION['user']);
 $stmt->execute();
 $resultado = $stmt->get_result();
 
 if ($resultado->num_rows === 1) {
     $fila = $resultado->fetch_assoc();
-    $_SESSION['ID'] = $fila['ID'];
-    $userId = $_SESSION['ID'];
-
     $_SESSION['NOMBRE_COMPLETO'] = $fila['NOMBRE'];
     $_SESSION['CORREO'] = $fila['CORREO'];
     $_SESSION['PLAN'] = $fila['PLAN'];
-    $_SESSION['ROL'] = $fila['ROL'];
-    $userRol = $_SESSION['rol'];
-
+    $_SESSION['FECHA_EXPIRACION'] = $fila['FECHA_EXPIRACION'];
+    $_SESSION['rol'] = $fila['ROL'];
 } else {
-    session_unset();
-    session_destroy();
     header('Location: logister.php');
     exit;
 }
 
+// 3. Formatear fecha de expiración
+if (!empty($_SESSION['FECHA_EXPIRACION'])) {
+    $fecha_exp = DateTime::createFromFormat('Y-m-d', $_SESSION['FECHA_EXPIRACION']);
+    $_SESSION['FECHA_EXPIRACION_FORMATO'] = $fecha_exp ? $fecha_exp->format('d/m/Y') : 'No disponible';
+}
 
+// 4. Generar token CSRF si no existe
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
+// 5. Obtener ID del usuario
+$stmtUserId = $connUser->prepare("SELECT ID, ROL FROM usuarios WHERE CORREO = ?");
+$stmtUserId->bind_param("s", $_SESSION['user']);
+$stmtUserId->execute();
+$resultUserId = $stmtUserId->get_result();
+
+if ($resultUserId->num_rows === 1) {
+    $userData = $resultUserId->fetch_assoc();
+    $userId = $userData['ID'];
+    $userRol = $userData['ROL'];
+} else {
+    $userId = null;
+    $userRol = null;
+}
+
+// 6. Obtener bases de datos del usuario
 $databases = [];
-
-$stmtDb = $connUser->prepare("SELECT b.NOMBRE_BD FROM usuario_base_datos ub JOIN base_datos b ON ub.ID_BD = b.ID_BD WHERE ub.ID_USUARIO = ?");
-$stmtDb->bind_param("i", $userId);
-$stmtDb->execute();
-$resultDb = $stmtDb->get_result();
-
-
-while ($row = $resultDb->fetch_assoc()) {
-    $databases[] = $row['NOMBRE_BD'];
+if ($userId) {
+    $stmtDb = $connUser->prepare("SELECT b.NOMBRE_BD FROM usuario_base_datos ub JOIN base_datos b ON ub.ID_BD = b.ID_BD WHERE ub.ID_USUARIO = ?");
+    $stmtDb->bind_param("i", $userId);
+    $stmtDb->execute();
+    $resultDb = $stmtDb->get_result();
+    while ($row = $resultDb->fetch_assoc()) {
+        $databases[] = $row['NOMBRE_BD'];
+    }
 }
 
 // 7. Validar cuota de bases de datos según el plan
 $numBd = count($databases);
-$plan = $_SESSION['PLAN'];
+$plan = $_SESSION['PLAN'] ?? 'gratuito';
 $puedeCrear = false;
 
 if ($plan === 'gratuito' && $numBd < 1) {
@@ -115,9 +119,165 @@ function getDiskUsagePercent() {
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Bootstrap y FontAwesome -->
-  <link rel="stylesheet" href="Estilos/index.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"  rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"  rel="stylesheet">
+  <style>
+    /* Estilos para modo claro y oscuro */
+    html.dark body {
+      background-color: #111827 !important;
+      color: #ffffff !important;
+    }
+    html.dark .bg-gray-800, html.dark .card, html.dark .modal-content {
+      background-color: #1f2937 !important;
+      color: #ffffff !important;
+    }
+    html.dark .btn-dark-toggle {
+      background-color: #374151;
+      color: white;
+    }
+    html.dark .dropdown-menu, html.dark .form-control {
+      background-color: #1f2937 !important;
+      color: #ffffff !important;
+    }
+    html.dark .dropdown-item:hover, html.dark .dropdown-item:focus {
+      background-color: #374151 !important;
+    }
+    html.dark .alert-danger, html.dark .alert-success {
+      background-color: #374151 !important;
+      color: #ffffff !important;
+    }
+    html.dark .btn-close-white {
+      filter: brightness(90%);
+    }
+    html.dark .btn-close-white:hover {
+      filter: brightness(75%);
+    }
+    html.dark .dropdown-toggle::after {
+      fi
+lter: invert(1);
+    }
+    html.dark .dropdown-item {
+      color: #ffffff !important;
+    }
+    html.dark .btn-primary, html.dark .btn-success, html.dark .btn-secondary, html.dark .btn-warning, html.dark .btn-danger {
+      filter: brightness(90%);
+    }
+    html.dark .btn-primary:hover, html.dark .btn-success:hover, html.dark .btn-secondary:hover, html.dark .btn-warning:hover, html.dark .btn-danger:hover {
+      filter: brightness(75%);
+    }
+    html.dark .campo-inactivo {
+      background-color: #374151 !important;
+    }
+    html.dark .campo-activo {
+      background-color: #1f2937 !important;
+    }
+    html.dark .dropdown-menu {
+      background-color: #1f2937 !important;
+      border: none !important;
+    }
+    html.dark .form-control, html.dark .form-select {
+      background-color: #1f2937 !important;
+      color: #ffffff !important;
+    }
+    html.dark .form-label {
+      color: #ffffff !important;
+    }
+    html.dark .form-check-input:checked {
+      background-color: #374151 !important;
+    }
+    html.dark .form-check-label {
+      color: #ffffff !important;
+    }
+    html.dark .form-control:focus {
+      box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.5) !important;
+    }
+
+    /* Estilos generales */
+    .campo-inactivo {
+      background-color: #e9ecef;
+      cursor: not-allowed;
+    }
+    .campo-activo {
+      background-color: #ffffff;
+    }
+    .dropdown-menu {
+      z-index: 1000;
+    }
+    .dropdown-toggle::after {
+      margin-left: 0.255em;
+      vertical-align: middle;
+    }
+    .card {
+      border: none;
+    }
+    .modal-content {
+      border-radius: 0.5rem;
+    }
+    .btn-dark-toggle {
+      background-color: #374151;
+      color: white;
+    }
+    .btn-dark-toggle:hover {
+      background-color: #4b5563;
+    }
+    .alert-danger, .alert-success {
+      background-color: #dc3545 !important;
+      color: #fff !important;
+    }
+    .form-control:focus {
+      box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.5);
+    }
+    .form-label {
+      font-weight: 500;
+    }
+    .dropdown-item {
+      display: block;
+      padding: 0.5rem 1rem;
+      clear: both;
+      font-weight: 400;
+      color: #212529;
+      text-align: inherit;
+      white-space: nowrap;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+    }
+    .dropdown-item:hover, .dropdown-item:focus {
+      background-color: #f1f3f5;
+      color: #111827;
+    }
+    .dropdown-menu.show {
+      display: block;
+    }
+    .btn-close-white {
+      color: #ffffff;
+      opacity: 0.5;
+    }
+    .btn-close-white:hover {
+      opacity: 0.75;
+    }
+    .btn-close-white:focus {
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+    }
+    .btn-close-white:disabled, .btn-close-white.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    @media (max-width: 768px) {
+      .dropdown-menu {
+        position: static;
+        float: none;
+        display: block;
+        width: 100%;
+        margin-top: 0.5rem;
+        border-radius: 0.375rem;
+      }
+      .dropdown:hover .dropdown-menu {
+        display: none;
+      }
+    }
+  </style>
 </head>
 <body>
   <!-- Navbar principal -->
@@ -147,7 +307,7 @@ function getDiskUsagePercent() {
           <i class="fas fa-user-circle text-2xl hover:text-blue-400 transition"></i>
         </button>
         <!-- Botón de administrador (solo para roles admin/superadmin) -->
-        <?php if (isset($_SESSION['ROL']) && in_array($_SESSION['ROL'], ['admin', 'superadmin'])): ?>
+        <?php if (isset($_SESSION['rol']) && in_array($_SESSION['rol'], ['admin', 'superadmin'])): ?>
           <a href="admin.php" title="Panel Admin" class="text-yellow-400 hover:text-yellow-300 transition text-2xl" aria-label="Ir al panel de administración">
             <i class="fas fa-shield-alt"></i>
           </a>
@@ -168,7 +328,7 @@ function getDiskUsagePercent() {
           <h2 class="text-xl font-semibold mb-4">Estado del Servicio</h2>
           <!-- Mostrar botón de mejora a Premium -->
           <?php
-            $plan = $_SESSION['PLAN'];
+            $plan = $_SESSION['PLAN'] ?? 'gratuito';
             if ($plan !== 'premium'):
           ?>
             <a href="tarjeta.php" title="Mejorar a Premium" class="text-blue-400 hover:text-blue-300 transition text-2xl">
@@ -180,7 +340,7 @@ function getDiskUsagePercent() {
             </span>
           <?php endif; ?>
         </div>
-        <p><strong>Plan:</strong> <?=  $plan === 'gratuito' ? 'Gratuito' : 'Premium' ?></p>
+        <p><strong>Plan:</strong> <?= $plan === 'gratuito' ? 'Gratuito' : 'Premium' ?></p>
         <p><strong>Bases de datos:</strong> <?= count($databases) ?> activas</p>
         <p><strong>Último backup:</strong> 2025-04-03</p>
         <button class="mt-4 bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition">Generar Backup</button>
@@ -255,7 +415,7 @@ function getDiskUsagePercent() {
             <div class="alert alert-success mb-3"><?= $_SESSION['exito']; unset($_SESSION['exito']); ?></div>
           <?php endif; ?>
           <form method="POST" id="perfilFormModal">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
             <input type="hidden" name="editar_perfil" value="1">
             <div class="mb-3">
               <label for="nombreModal" class="form-label">Nombre completo</label>

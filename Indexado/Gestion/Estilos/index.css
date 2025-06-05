@@ -1,0 +1,155 @@
+    /* Estilos para modo claro y oscuro */
+    html.dark body {
+      background-color: #111827 !important;
+      color: #ffffff !important;
+    }
+    html.dark .bg-gray-800, html.dark .card, html.dark .modal-content {
+      background-color: #1f2937 !important;
+      color: #ffffff !important;
+    }
+    html.dark .btn-dark-toggle {
+      background-color: #374151;
+      color: white;
+    }
+    html.dark .dropdown-menu, html.dark .form-control {
+      background-color: #1f2937 !important;
+      color: #ffffff !important;
+    }
+    html.dark .dropdown-item:hover, html.dark .dropdown-item:focus {
+      background-color: #374151 !important;
+    }
+    html.dark .alert-danger, html.dark .alert-success {
+      background-color: #374151 !important;
+      color: #ffffff !important;
+    }
+    html.dark .btn-close-white {
+      filter: brightness(90%);
+    }
+    html.dark .btn-close-white:hover {
+      filter: brightness(75%);
+    }
+    html.dark .dropdown-toggle::after {
+      fi
+lter: invert(1);
+    }
+    html.dark .dropdown-item {
+      color: #ffffff !important;
+    }
+    html.dark .btn-primary, html.dark .btn-success, html.dark .btn-secondary, html.dark .btn-warning, html.dark .btn-danger {
+      filter: brightness(90%);
+    }
+    html.dark .btn-primary:hover, html.dark .btn-success:hover, html.dark .btn-secondary:hover, html.dark .btn-warning:hover, html.dark .btn-danger:hover {
+      filter: brightness(75%);
+    }
+    html.dark .campo-inactivo {
+      background-color: #374151 !important;
+    }
+    html.dark .campo-activo {
+      background-color: #1f2937 !important;
+    }
+    html.dark .dropdown-menu {
+      background-color: #1f2937 !important;
+      border: none !important;
+    }
+    html.dark .form-control, html.dark .form-select {
+      background-color: #1f2937 !important;
+      color: #ffffff !important;
+    }
+    html.dark .form-label {
+      color: #ffffff !important;
+    }
+    html.dark .form-check-input:checked {
+      background-color: #374151 !important;
+    }
+    html.dark .form-check-label {
+      color: #ffffff !important;
+    }
+    html.dark .form-control:focus {
+      box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.5) !important;
+    }
+
+    /* Estilos generales */
+    .campo-inactivo {
+      background-color: #e9ecef;
+      cursor: not-allowed;
+    }
+    .campo-activo {
+      background-color: #ffffff;
+    }
+    .dropdown-menu {
+      z-index: 1000;
+    }
+    .dropdown-toggle::after {
+      margin-left: 0.255em;
+      vertical-align: middle;
+    }
+    .card {
+      border: none;
+    }
+    .modal-content {
+      border-radius: 0.5rem;
+    }
+    .btn-dark-toggle {
+      background-color: #374151;
+      color: white;
+    }
+    .btn-dark-toggle:hover {
+      background-color: #4b5563;
+    }
+    .alert-danger, .alert-success {
+      background-color: #dc3545 !important;
+      color: #fff !important;
+    }
+    .form-control:focus {
+      box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.5);
+    }
+    .form-label {
+      font-weight: 500;
+    }
+    .dropdown-item {
+      display: block;
+      padding: 0.5rem 1rem;
+      clear: both;
+      font-weight: 400;
+      color: #212529;
+      text-align: inherit;
+      white-space: nowrap;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+    }
+    .dropdown-item:hover, .dropdown-item:focus {
+      background-color: #f1f3f5;
+      color: #111827;
+    }
+    .dropdown-menu.show {
+      display: block;
+    }
+    .btn-close-white {
+      color: #ffffff;
+      opacity: 0.5;
+    }
+    .btn-close-white:hover {
+      opacity: 0.75;
+    }
+    .btn-close-white:focus {
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+    }
+    .btn-close-white:disabled, .btn-close-white.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    @media (max-width: 768px) {
+      .dropdown-menu {
+        position: static;
+        float: none;
+        display: block;
+        width: 100%;
+        margin-top: 0.5rem;
+        border-radius: 0.375rem;
+      }
+      .dropdown:hover .dropdown-menu {
+        display: none;
+      }
+    }
