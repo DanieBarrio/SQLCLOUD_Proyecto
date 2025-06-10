@@ -15,7 +15,7 @@ function contraseña_valida($pass) {
 // Validar token al entrar con GET
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     if (empty($token)) {
-        $mensaje = "❌ Token inválido o no proporcionado.";
+        $mensaje = "❌ Tiempo inválido o no proporcionado.";
         $mostrar_formulario = false;
     } else {
         $conn = conectar();
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         $stmt->store_result();
 
         if ($stmt->num_rows === 0) {
-            $mensaje = "❌ Token inválido o expirado.";
+            $mensaje = "❌ Tiempo de recuperacion expirado.";
             $mostrar_formulario = false;
         }
         $stmt->close();
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mensaje = "✅ Contraseña actualizada correctamente.";
             $mostrar_formulario = false;
         } else {
-            $mensaje = "❌ Token inválido o expirado.";
+            $mensaje = "❌ Tiempo de recuperación expirado.";
             $mostrar_formulario = false;
         }
         $conn->close();
@@ -78,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Cambiar contraseña</title>
+    <link rel="icon" type="image/png" href="../Recursos/favicon.png?v=2">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gradient-to-br from-purple-700 to-indigo-600 min-h-screen flex items-center justify-center">

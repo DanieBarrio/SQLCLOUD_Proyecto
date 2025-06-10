@@ -10,5 +10,5 @@ $evento = 'Login fallido';
 $fecha = date('Y-m-d H:i:s');
 
 $linea = "[$fecha] [$ip] [$correo] $evento";
-file_put_contents("logs.txt", $linea . PHP_EOL, FILE_APPEND | LOCK_EX);
+file_put_contents("/var/www/sqlcloud.site/logslogs.txt", $linea . PHP_EOL, FILE_APPEND | LOCK_EX);
 ?>

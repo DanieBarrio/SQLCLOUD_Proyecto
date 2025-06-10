@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$ip = $_SERVER['REMOTE_ADDR'] ?? 'IP desconocida';
 	$userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'User-Agent desconocido';
 	$linea = "[$fecha] [$ip] [$correo] Recuperación de contraseña solicitada | UA: $userAgent";
-	file_put_contents("logs.txt", $linea . PHP_EOL, FILE_APPEND | LOCK_EX);
+	file_put_contents("/var/www/sqlcloud.site/logs/logs.txt", $linea . PHP_EOL, FILE_APPEND | LOCK_EX);
 
             $mail = new PHPMailer(true);
             try {
@@ -66,6 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>Recuperar contraseña</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="../Recursos/favicon.png?v=2">
+
 </head>
 <body class="bg-gradient-to-br from-indigo-600 to-purple-700 min-h-screen flex items-center justify-center">
     <div class="bg-white shadow-xl rounded-xl p-8 max-w-md w-full">

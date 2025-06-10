@@ -11,7 +11,7 @@ if (isset($_SESSION['user'])) {
     $evento = 'Login exitoso';
 
     $linea = "[$fecha] [$ip] [$correo] $evento";
-    file_put_contents("logs.txt", $linea . PHP_EOL, FILE_APPEND | LOCK_EX);
+    file_put_contents("/var/www/sqlcloud.site/logs/logs.txt", $linea . PHP_EOL, FILE_APPEND | LOCK_EX);
 }
 ?>
 

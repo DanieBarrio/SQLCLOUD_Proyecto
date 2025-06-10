@@ -1,19 +1,14 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 session_start();
 require 'conexion.php';
 
-// Verificar sesión activa
 if (!isset($_SESSION['user'])) {
     header("Location: logister.php");
     exit;
 }
 
-// Bloquear acceso a usuarios premium
 if (strtolower($_SESSION['PLAN']) === 'premium') {
-    header("Location: index.php"); // O a donde quieras redirigirlos
+    header("Location: index.php");
     exit;
 }
 
@@ -38,6 +33,7 @@ if ($plan != 'gratuito') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
   <title>SQLCLOUD Pago</title>
+    <link rel="icon" type="image/png" href="../Recursos/favicon.png?v=2">
 <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -495,7 +491,7 @@ if ($plan != 'gratuito') {
   <div class="modal" id="modal-confirm">
     <div class="modal-content">
       <h2>Confirmar pago</h2>
-      <p>¿Desea continuar? Se realizará un cargo de <strong>80 €</strong> por el plan Premium.</p>
+      <p>¿Desea continuar? Se realizará un cargo de <strong>900 €</strong> por el plan Premium.</p>
       <button id="confirm-yes" style="background: #28a745;">Aceptar</button>
       <button id="confirm-no" style="background: #dc3545;">Cancelar</button>
     </div>

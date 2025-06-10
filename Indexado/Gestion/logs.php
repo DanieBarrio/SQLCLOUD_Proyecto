@@ -31,7 +31,7 @@ if ($rol !== 'admin' && $rol !== 'superadmin') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_logs'])) {
     if (in_array($rol, ['admin', 'superadmin'])) {
-        file_put_contents(__DIR__ . '/logs.txt', '');
+        file_put_contents('/var/www/sqlcloud.site/logs/logs.txt', '');
         header("Location: logs.php?borrado=ok");
         exit;
     } else {
@@ -43,8 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_logs'])) {
 
 // Leer logs desde el archivo
 $logs = [];
-$logFile = __DIR__ . '/logs.txt';
-
+$logFile = '/var/www/sqlcloud.site/logs/logs.txt';
 if (file_exists($logFile)) {
     $lineas = file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach (array_reverse($lineas) as $index => $linea) {
@@ -62,6 +61,8 @@ if (file_exists($logFile)) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SQLCloud - Admin</title>
+      <link rel="icon" type="image/png" href="../Recursos/favicon.png?v=2">
+
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -69,7 +70,7 @@ if (file_exists($logFile)) {
     <h1 class="text-xl font-bold">SQLCloud - Panel Admin</h1>
     <nav class="space-x-4">
       <a href="index.php" class="hover:underline">Inicio</a>
-      <a href="admin.php" class="hover:underline">Administrar</a>
+      <a href="superadmin.php" class="hover:underline">Administrar</a>
       <?php if ($rol === 'admin' || $rol === 'superadmin'): ?>
         <a href="#" class="text-yellow-400 font-semibold">Logs</a>
       <?php endif; ?>
@@ -82,19 +83,21 @@ if (file_exists($logFile)) {
   <main class="p-6">
     <h2 class="text-2xl font-bold mb-4">Últimos eventos registrados</h2>
     <div class="overflow-x-auto">
-<?php if (in_array($rol, ['admin', 'superadmin'])): ?>
+<?php if ($rol === 'superadmin'): ?>
   <?php if (isset($_GET['borrado']) && $_GET['borrado'] === 'ok'): ?>
     <div class="bg-green-600 text-white px-4 py-2 rounded mb-4">
       ✅ Todos los logs han sido eliminados correctamente.
     </div>
   <?php endif; ?>
 
-  <form method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar TODOS los logs? Esta acción es irreversible.');" class="mb-6">
+  <form method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar TODOS los logs? Esta acción es irreversible');" class="mb-6">
     <button type="submit" name="eliminar_logs"
             class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow">
       Eliminar todos los logs
     </button>
   </form>
+<?php else: ?>
+  <p class="text-gray-600 mb-6">Solo los usuarios con rol de superadministrador pueden eliminar los logs.</p>
 <?php endif; ?>
 
       <table class="min-w-full bg-white shadow rounded">

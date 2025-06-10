@@ -18,7 +18,7 @@
 
 Esto es un proyecto como trabajo de final de ciclo para el instituto IES Antonio Machado. El proyecto se basa en dar un servicio de hosting de base de datos para nuestros clientes, la tecnología que necesiten una solución accesible, segura y eficiente para gestionar sus datos en la nube.  
 
-El servicio permite a los usuarios alojar, administrar y acceder a bases de datos SQL desde cualquier lugar, ofreciendo características copias de seguridad, seguridad y adaptabilidad a los proyectos. Además, el proyecto incluye una interfaz intuitiva que facilita la configuración y el uso del servicio, incluso para aquellos con conocimientos básicos de administración de bases de datos. 
+El servicio permite a los usuarios alojar, administrar y acceder a bases de datos SQL desde cualquier lugar, ofreciendo características copias de seguridad, seguridad y adaptabilidad a los proyectos. Además, el proyecto incluye una interfaz intuitiva que facilita la configuración y el uso del servicio. 
 
 
 ## Acceso al proyecto

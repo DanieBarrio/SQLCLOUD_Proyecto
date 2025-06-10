@@ -119,7 +119,8 @@ if (!$exists) {
 if ($isRunning && isset($_POST['cmd'])) {
     $command = $_POST['sql_command'];
     $command = str_replace("exit", "sexi", $command);
-    // Comando completo para ejecutar SQL en MySQL desde el contenedor
+    $comprobar = str_replace(" ", "", $command);
+    if($comprobar != ""){
     $execCmd = "docker exec $containerName mariadb " .
         "-h $dbHost " .
         "-u $dbUser " .
@@ -129,7 +130,14 @@ if ($isRunning && isset($_POST['cmd'])) {
 	"--default-auth=mysql_native_password " .
         "-e \"$command\" 2>&1";
     exec($execCmd, $output, $returnVar);
+    if ($returnVar === 0) {
+
+    if (empty($output)) {
+            $output = ["Comando ejecutado correctamente"];
+        }
+    }
     $output = implode("\n", $output);
+    }
 }
 
 
@@ -141,6 +149,7 @@ if ($isRunning && isset($_POST['cmd'])) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - <?= htmlspecialchars($nombreBd) ?></title>
+    <link rel="icon" type="image/png" href="../Recursos/favicon.png?v=2">
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"  rel="stylesheet">
   <!-- FontAwesome -->
@@ -256,7 +265,7 @@ if ($isRunning && isset($_POST['cmd'])) {
     <form method="POST" class="mb-4">
       <div class="mb-3">
         <label for="sql_command" class="form-label">Escribe un comando SQL</label>
-        <input type="text" name="sql_command" id="sql_command" class="form-control terminal-input" placeholder="Ej: SELECT * FROM usuarios" required>
+	<textarea name="sql_command" id="sql_command" class="form-control terminal-input" rows="12" placeholder="Ej: SELECT * FROM usuarios&#10;INSERT INTO tabla (col) VALUES ('valor');&#10;La palabra exit no es ejecutada en la base de datos"></textarea>
       </div>
       <button type="submit" name="cmd" class="btn btn-primary">
         <i class="fas fa-terminal"></i> Ejecutar
@@ -268,8 +277,21 @@ if ($isRunning && isset($_POST['cmd'])) {
       <h4 class="mt-4">📤 Salida del Comando:</h4>
       <pre><?= htmlspecialchars($output) ?></pre>
     <?php endif; ?>
+    <!-- Botones de plantillas SQL -->
+<div class="mb-4">
+  <h5>🧩 Plantillas SQL</h5>
+  <div class="btn-group" role="group" aria-label="Plantillas SQL">
+    <button type="button" class="btn btn-outline-secondary" onclick="appendCommandToTextarea('CREATE TABLE nombre_tabla (id INT PRIMARY KEY AUTO_INCREMENT, campo1 VARCHAR(255), campo2 TEXT);\n-- Escribe aquí tu código personalizado')">CREATE TABLE</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="appendCommandToTextarea('INSERT INTO nombre_tabla (campo1, campo2) VALUES (\'valor1\', \'valor2\');')">INSERT INTO</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="appendCommandToTextarea('SELECT * FROM nombre_tabla;')">SELECT</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="appendCommandToTextarea('UPDATE nombre_tabla SET campo1 = \'nuevo_valor\' WHERE id = 1;')">UPDATE</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="appendCommandToTextarea('DELETE FROM nombre_tabla WHERE id = 1;')">DELETE</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="appendCommandToTextarea('ALTER TABLE nombre_tabla ADD nueva_columna VARCHAR(255);')">ALTER TABLE</button>
   </div>
+</div>
+</div>
 
+  </div>
   <!-- Footer -->
   <footer class="footer">
     © <?= date('Y') ?> SQLCloud. Todos los derechos reservados.
@@ -283,7 +305,7 @@ if ($isRunning && isset($_POST['cmd'])) {
       document.documentElement.classList.toggle('dark');
       const isDark = document.documentElement.classList.contains('dark');
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      
+
       // Actualizar icono
       document.querySelector('#themeToggle i').classList.toggle('fa-moon');
       document.querySelector('#themeToggle i').classList.toggle('fa-sun');
@@ -297,6 +319,17 @@ if ($isRunning && isset($_POST['cmd'])) {
         document.querySelector('#themeToggle i').classList.replace('fa-moon', 'fa-sun');
       }
     });
+     function appendCommandToTextarea(sql) {
+    const textarea = document.getElementById('sql_command');
+    const currentContent = textarea.value;
+    
+    // Agregar salto de línea si el textarea no está vacío
+    if (currentContent.trim() !== '') {
+      sql = '\n\n' + sql;
+    }
+    
+    textarea.value += sql;
+  }
   </script>
 </body>
 </html>

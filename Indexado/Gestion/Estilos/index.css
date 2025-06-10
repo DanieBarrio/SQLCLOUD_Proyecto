@@ -96,8 +96,12 @@ lter: invert(1);
     .btn-dark-toggle:hover {
       background-color: #4b5563;
     }
-    .alert-danger, .alert-success {
-      background-color: #dc3545 !important;
+    .alert-danger {
+      background-color: #dc3545 !important; /* rojo */
+      color: #fff !important;
+    }
+    .alert-success {
+      background-color: #28a745 !important; /* VERDE ✔️ */
       color: #fff !important;
     }
     .form-control:focus {
