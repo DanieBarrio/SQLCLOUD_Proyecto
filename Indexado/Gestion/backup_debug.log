@@ -1,9 +1,0 @@
-array (
-  'cmd' => 'docker exec \'Indiana\' /usr/bin/mariadb-dump --quick -u\'davidjimenez05CiesamachadoCorg\' -p\'$2y$10$ZCLCGyATOjVRGd/AHAl9eeMwlrNzt85fdro84cXWFX7f5TyaZEUa.\' Indiana > \'/tmp/backup_Indiana_20250609_201240.sql\' 2>&1',
-  'return' => 2,
-  'output' => 
-  array (
-  ),
-  'exists' => true,
-  'filesize' => 131,
-)
