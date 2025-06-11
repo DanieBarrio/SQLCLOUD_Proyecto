@@ -1,7 +1,5 @@
 <?php
 session_start();
-require 'conexion.php';
-require 'funciones.php';
 
 if (!isset($_SESSION['user'])) {
     session_unset();
@@ -9,6 +7,8 @@ if (!isset($_SESSION['user'])) {
     header('Location: logister.php');
     exit;
 }
+
+require 'conexion.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tokenRecibido = $_POST['csrf_token'] ?? '';
@@ -75,15 +75,6 @@ if ($plan === 'gratuito' && $numBd < 1) {
 }
 
 
-// 7. Esto coge los datos que tiran  los comandos y los guardo en variables
-$numBd = count($databases);
-$plan = $_SESSION['PLAN'];
-$puedeCrear = false;
-if ($plan === 'gratuito' && $numBd < 1) {
-    $puedeCrear = true;
-} elseif ($plan === 'premium' && $numBd < 3) {
-    $puedeCrear = true;
-}
 
 // Función para obtener tamaño de base de datos
 function getDatabaseSize($conn, $dbName) {
@@ -302,29 +293,55 @@ foreach ($databases as $db) {
           <a href="lista_backups.php" class="inline-block bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded transition mb-4 flex items-center">
             <i class="fas fa-download me-2"></i> Ver todos mis backups
           </a>
-          <?php
-          // Mostrar los últimos 3 backups
-          $user = $_SESSION['user'];
-          $dir = "/var/backups/sqlcloud/" . $user;
-          $files = is_dir($dir)
-            ? array_filter(scandir($dir), fn($f) => preg_match('/\.sql\.gz$/', $f))
-            : [];
-          $latestBackups = array_slice(array_reverse($files), 0, 3);
-          ?>
-          <?php if (empty($latestBackups)): ?>
-            <p>No tienes backups disponibles.</p>
-          <?php else: ?>
-            <ul class="space-y-2">
-              <?php foreach ($latestBackups as $file): ?>
-                <li class="flex justify-between items-center border-b border-gray-700 pb-2">
-                  <span><?= htmlspecialchars($file) ?></span>
-                  <a href="descargar_backup.php?file=<?= urlencode($file) ?>" class="text-blue-400 hover:text-blue-300 transition">
-                    Descargar
-                  </a>
-                </li>
-              <?php endforeach; ?>
-            </ul>
-          <?php endif; ?>
+<?php
+            // Obtener el nombre del usuario logueado
+            $user = $_SESSION['user'];
+                          
+            // Definir la ruta donde se almacenan los backups del usuario
+            $dir = "/var/backups/sqlcloud/" . $user;
+                          
+            // Verificar si la carpeta existe
+            if (is_dir($dir)) {
+                // Listar todos los archivos en la carpeta
+                $allFiles = scandir($dir);
+            
+                // Filtrar solo los archivos que terminan en ".sql.gz"
+                $filteredFiles = [];
+                foreach ($allFiles as $file) {
+                    if (preg_match('/\.sql\.gz$/', $file)) {
+                        $filteredFiles[] = $file;
+                    }
+                }
+              
+                // Reordenar para tener los más recientes primero
+                $reversedFiles = array_reverse($filteredFiles);
+              
+                // Tomar solo los 3 últimos backups
+                $latestBackups = array_slice($reversedFiles, 0, 3);
+            } else {
+                // Si no existe la carpeta, no hay backups
+                $latestBackups = [];
+            }
+            ?>
+            
+            <!-- Mostrar contenido según si hay backups o no -->
+            <?php if (empty($latestBackups)): ?>
+              <p>No tienes backups disponibles.</p>
+            <?php else: ?>
+              <ul class="space-y-2">
+                <?php foreach ($latestBackups as $file): ?>
+                  <li class="flex justify-between items-center border-b border-gray-700 pb-2">
+                    <!-- Mostrar nombre del archivo -->
+                    <span><?= htmlspecialchars($file) ?></span>
+                
+                    <!-- Enlace para descargar -->
+                    <a href="descargar_backup.php?file=<?= urlencode($file) ?>" class="text-blue-400 hover:text-blue-300 transition">
+                      Descargar
+                    </a>
+                  </li>
+                <?php endforeach; ?>
+              </ul>
+            <?php endif; ?>
         </div>
       </div>
     </section>

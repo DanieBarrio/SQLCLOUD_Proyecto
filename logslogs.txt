@@ -1,0 +1,4 @@
+[2025-06-11 02:55:53] [192.168.2.30] [a@aa.a] Login fallido
+[2025-06-11 02:55:56] [192.168.2.30] [a@a.a] Login fallido
+[2025-06-11 02:55:57] [192.168.2.30] [a@a.a] Login fallido
+[2025-06-11 03:36:10] [192.168.2.30] [usuario@gmail.com] Login fallido

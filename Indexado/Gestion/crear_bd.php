@@ -1,11 +1,7 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL); session_start();
+session_start();
 require 'conexion.php';
 
-
-// 1. Verificar autenticación
 if (!isset($_SESSION['user'])) {
     session_unset();
     session_destroy();
@@ -15,7 +11,6 @@ if (!isset($_SESSION['user'])) {
 
 $conn = conectar();
 
-// 2. Obtener ID del usuario actual
 $stmtUserId = $conn->prepare("SELECT ID, CORREO, CONTRASENA FROM usuarios WHERE CORREO = ?");
 $stmtUserId->bind_param("s", $_SESSION['user']);
 $stmtUserId->execute();
@@ -32,15 +27,14 @@ $usuario = $resultUserId->fetch_assoc();
 $userId = $usuario['ID'];
 $nombreUsuario = $usuario['CORREO'];
 $contrasenaUsuario = $usuario['CONTRASENA'];
-$stmtUserId->close(); // ✅ Cerrar statement
+$stmtUserId->close();
 
-// 3. Obtener número actual de bases de datos
 $stmtDbCount = $conn->prepare("SELECT COUNT(*) AS total FROM usuario_base_datos WHERE ID_USUARIO = ?");
 $stmtDbCount->bind_param("i", $userId);
 $stmtDbCount->execute();
 $stmtDbCount->bind_result($numBd);
 $stmtDbCount->fetch();
-$stmtDbCount->close(); // ✅ Cerrar statement
+$stmtDbCount->close();
 
 $plan = $_SESSION['PLAN'] ?? 'gratuito';
 $puedeCrear = false;
@@ -51,7 +45,6 @@ if ($plan === 'gratuito' && $numBd < 1) {
     $puedeCrear = true;
 }
 
-// 4. Manejar formulario de creación
 $error = "";
 $exito = "";
 
@@ -77,8 +70,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($plan === 'premium' && $numBd >= 3) {
         $error = "Has alcanzado el límite de bases de datos.";
     } else {
-        // 5. Verificar unicidad del nombre de BD
-        $stmtCheck = $conn->prepare("SELECT NOMBRE_BD FROM base_datos WHERE NOMBRE_BD = ?");
+
+	$invalidChars = array( " ", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "+", "=", "{", "}", "[", "]", "|", "\\", ":", ";", "\"", "'", "<", ">", ",", ".", "?", "/", "~", "`" );
+        $nombreBd = str_replace($invalidChars, "B", $nombreBd);
+
+	$stmtCheck = $conn->prepare("SELECT NOMBRE_BD FROM base_datos WHERE NOMBRE_BD = ?");
         $stmtCheck->bind_param("s", $nombreBd);
         $stmtCheck->execute();
         $stmtCheck->store_result();
@@ -86,7 +82,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmtCheck->num_rows > 0) {
             $error = "El nombre de la base de datos ya está en uso.";
         } else {
-            // 6. Crear base de datos y asignar permisos
             $createDbSql = "CREATE DATABASE IF NOT EXISTS `$nombreBd`";
             if (!$conn->query($createDbSql)) {
                 $error = "Error al crear la base de datos";
@@ -97,31 +92,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		if (!$conn->query($createUser)){
 		    $error = "Error al crear usuario";
 		}
-                // 7. Otorgar permisos al usuario actual
                 $grantSql = "GRANT ALL PRIVILEGES ON `$nombreBd`.* TO '$nombreUsuario'@'172.17.0.%'";
                 if (!$conn->query($grantSql)) {
                     $error = "Error al asignar permisos";
                 } else {
 
-                    // 8. Ejecutar FLUSH PRIVILEGES
                     if (!$conn->query("FLUSH PRIVILEGES")) {
                         $error = "Error al actualizar privilegios";
                     } else {
 
-                        // 9. Insertar en base_datos
                         $stmtInsertBd = $conn->prepare("INSERT INTO base_datos (NOMBRE_BD) VALUES (?)");
                         $stmtInsertBd->bind_param("s", $nombreBd);
                         $stmtInsertBd->execute();
                         $idBd = $conn->insert_id;
-                        $stmtInsertBd->close(); // ✅ Cerrar statement
+                        $stmtInsertBd->close();
 
-                        // 10. Insertar en usuario_base_datos
                         $idUsuarioBd = $userId . '_' . $idBd;
                         $stmtInsertRel = $conn->prepare("INSERT INTO usuario_base_datos (ID_USUARIO_BD, ID_USUARIO, ID_BD, CONTRASENA_USU, CORREO_USU) VALUES (?, ?, ?, ?,?)");
                         $stmtInsertRel->bind_param("siiss", $idUsuarioBd, $userId, $idBd, $contrasenaUsuario, $nombreUsuario);
 
                         if ($stmtInsertRel->execute()) {
-                            $stmtInsertRel->close(); // ✅ Cerrar statement
+                            $stmtInsertRel->close();
                             header("Location: index.php");
                             exit;
                         } else {
@@ -131,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
-        $stmtCheck->close(); // ✅ Cerrar statement
+        $stmtCheck->close();
     }
 }
 ?>

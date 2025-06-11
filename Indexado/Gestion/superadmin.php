@@ -1,9 +1,4 @@
 <?php
-// Activar reporte de errores (solo para desarrollo)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
 
 if (!isset($_SESSION['ROL']) || !in_array($_SESSION['ROL'], ['admin', 'superadmin'])) {
@@ -15,12 +10,7 @@ include 'conexion.php';
 
 $conn = conectar();
 
-$sql = "
-    SELECT u.ID, u.NOMBRE, u.CORREO, u.ROL, p.T_PLAN 
-    FROM usuarios u
-    LEFT JOIN plan p ON u.ID = p.ID
-    ORDER BY FIELD(u.ROL, 'superadmin', 'admin', 'usuario'), u.ID DESC
-";
+$sql = "SELECT u.ID, u.NOMBRE, u.CORREO, u.ROL, p.T_PLAN FROM usuarios u LEFT JOIN plan p ON u.ID = p.ID ORDER BY FIELD(u.ROL, 'superadmin', 'admin', 'usuario'), u.ID DESC";
 $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
@@ -475,7 +465,7 @@ $result = $conn->query($sql);
                       if (in_array($row['ROL'], ['admin', 'superadmin'])) $adminCount++;
                     }
                     echo $adminCount;
-                    $result->data_seek(0); // Reset pointer
+                    $result->data_seek(0); 
                   ?>
                 </h3>
               </div>
@@ -496,7 +486,7 @@ $result = $conn->query($sql);
                       if ($row['T_PLAN'] === 'premium') $premiumCount++;
                     }
                     echo $premiumCount;
-                    $result->data_seek(0); // Reset pointer
+                    $result->data_seek(0); 
                   ?>
                 </h3>
               </div>
@@ -517,7 +507,7 @@ $result = $conn->query($sql);
                       if ($row['ROL'] === 'superadmin') $superadminCount++;
                     }
                     echo $superadminCount;
-                    $result->data_seek(0); // Reset pointer
+                    $result->data_seek(0); 
                   ?>
                 </h3>
               </div>

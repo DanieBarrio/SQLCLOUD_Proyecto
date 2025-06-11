@@ -2,8 +2,7 @@
 header('Content-Type: application/json');
 
 session_start();
-require 'conexion.php'; // Asegúrate que existe
-require 'funciones.php';
+require 'conexion.php';
 
 $response = ['exito' => false, 'mensaje' => 'Error desconocido'];
 
@@ -21,7 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password_actual'])) {
 
     $conn = conectar();
 
-    // Validar contraseña actual
     $stmt = $conn->prepare("SELECT CONTRASENA FROM usuarios WHERE ID = ?");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
@@ -39,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password_actual'])) {
         exit;
     }
 
-    // Actualizar nombre y correo
     $stmt = $conn->prepare("UPDATE usuarios SET NOMBRE = ?, CORREO = ? WHERE ID = ?");
     $stmt->bind_param("ssi", $nombre, $correo, $userId);
     if ($stmt->execute()) {

@@ -21,7 +21,6 @@ function respuesta_ok($mensaje) {
     exit();
 }
 
-// Función para guardar logs
 function guardarLog($evento) {
     $ip = $_SERVER['REMOTE_ADDR'];
     $fecha = date("Y-m-d H:i:s");
@@ -35,7 +34,6 @@ if (!$conn) {
     respuesta_error('Error de conexión con la base de datos');
 }
 
-// Función para verificar si un usuario es superadmin
 function es_superadmin($conn, $id_usuario) {
     $stmt = $conn->prepare("SELECT ROL FROM usuarios WHERE ID = ?");
     $stmt->bind_param("i", $id_usuario);
@@ -46,11 +44,9 @@ function es_superadmin($conn, $id_usuario) {
     return ($usuario['ROL'] === 'superadmin');
 }
 
-// Acciones que requieren verificación de usuario objetivo
 if (in_array($accion, ['eliminar_usuario', 'actualizar_plan', 'actualizar_rol'])) {
     $id_usuario_objetivo = intval($_POST['id_usuario'] ?? 0);
-    
-    // Si el usuario actual es admin y el objetivo es superadmin, denegar
+
     if ($_SESSION['ROL'] === 'admin' && es_superadmin($conn, $id_usuario_objetivo)) {
         respuesta_error('No tienes permisos para realizar esta acción sobre un superadmin.');
     }
@@ -70,7 +66,6 @@ if ($accion === 'eliminar_usuario') {
 
     try {
 
-	// Obtener información del usuario antes de eliminarlo
         $stmt = $conn->prepare("SELECT CORREO, NOMBRE FROM usuarios WHERE ID = ?");
         $stmt->bind_param("i", $id_usuario);
         $stmt->execute();
@@ -85,10 +80,8 @@ if ($accion === 'eliminar_usuario') {
         $nombre_usuario = $usuario['NOMBRE'];
         $stmt->close();
 
-        // Registrar log con nombre y correo
         guardarLog("Eliminó al usuario '$nombre_usuario' ($correo_usuario) con ID $id_usuario");
 
-        // Eliminar datos relacionados antes del usuario
         $stmt = $conn->prepare("DELETE FROM token WHERE ID = ?");
         $stmt->bind_param("i", $id_usuario);
         $stmt->execute();
@@ -116,7 +109,7 @@ if ($accion === 'eliminar_usuario') {
 
 
 } elseif ($accion === 'actualizar_plan') {
-    $id_usuario = $id_usuario_objetivo; // Ya definido
+    $id_usuario = $id_usuario_objetivo;
     $plan = $_POST['plan'] ?? '';
 
     if ($id_usuario <= 0 || empty($plan)) {
@@ -129,7 +122,6 @@ if ($accion === 'eliminar_usuario') {
         $stmt->execute();
         $stmt->close();
 
-	// ✅ Guardar log
         guardarLog("Actualizó el plan del usuario con ID $id_usuario a '$plan'");
 
         respuesta_ok('Plan actualizado correctamente.');
@@ -138,7 +130,7 @@ if ($accion === 'eliminar_usuario') {
     }
 
 } elseif ($accion === 'actualizar_rol') {
-    $id_usuario = $id_usuario_objetivo; // Ya definido
+    $id_usuario = $id_usuario_objetivo;
     $rol = $_POST['rol'] ?? '';
 
     $roles_validos = ['usuario', 'admin', 'superadmin'];
@@ -146,7 +138,6 @@ if ($accion === 'eliminar_usuario') {
         respuesta_error('Datos inválidos para actualizar el rol.');
     }
 
-    // Solo superadmin puede cambiar roles
     if ($_SESSION['ROL'] !== 'superadmin') {
         respuesta_error('No tienes permisos suficientes para modificar roles.');
     }
@@ -157,7 +148,7 @@ if ($accion === 'eliminar_usuario') {
         $stmt->execute();
 
         if ($stmt->affected_rows > 0) {
-	// ✅ Guardar log
+
          guardarLog("Cambió el rol del usuario con ID $id_usuario a '$rol'");
             respuesta_ok('Rol actualizado correctamente.');
         } else {
@@ -198,7 +189,6 @@ if ($accion === 'eliminar_usuario') {
     }
 
 } elseif ($accion === 'eliminar_base') {
-    // Solo superadmin puede eliminar bases de datos
     if ($_SESSION['ROL'] !== 'superadmin') {
         respuesta_error('No tienes permisos para eliminar bases de datos.');
     }
@@ -215,7 +205,6 @@ if ($accion === 'eliminar_usuario') {
         $stmt->execute();
         $stmt->close();
 
-	// ✅ Guardar log
         guardarLog("Eliminó la base de datos con ID $id_bd");
 
         respuesta_ok('Base de datos eliminada correctamente.');
@@ -224,7 +213,6 @@ if ($accion === 'eliminar_usuario') {
     }
 
 } elseif ($accion === 'eliminar_todas_bases') {
-    // Solo superadmin puede eliminar todas las bases de datos
     if ($_SESSION['ROL'] !== 'superadmin') {
         respuesta_error('No tienes permisos para eliminar bases de datos.');
     }

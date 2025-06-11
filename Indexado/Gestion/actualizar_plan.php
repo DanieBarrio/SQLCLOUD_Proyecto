@@ -18,7 +18,6 @@ if (isset($_SESSION['PLAN']) && strtolower($_SESSION['PLAN']) === 'premium') {
 $conn = conectar();
 $correo = $_SESSION['user'];
 
-// Obtener el ID del usuario
 $stmt = $conn->prepare("SELECT ID FROM usuarios WHERE CORREO = ?");
 $stmt->bind_param("s", $correo);
 $stmt->execute();
@@ -33,7 +32,6 @@ if ($result->num_rows !== 1) {
 $row = $result->fetch_assoc();
 $usuario_id = $row['ID'];
 
-// Actualizar el plan
 $stmt = $conn->prepare("UPDATE plan SET T_PLAN = 'premium' WHERE ID = ?");
 $stmt->bind_param("i", $usuario_id);
 

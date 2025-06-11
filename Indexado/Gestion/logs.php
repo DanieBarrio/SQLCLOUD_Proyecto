@@ -25,7 +25,7 @@ $rol = $row['ROL'];
 $idUsuario = $row['ID'];
 
 if ($rol !== 'admin' && $rol !== 'superadmin') {
-    header('Location: logister.php');
+    header('Location: index.php');
     exit;
 }
 

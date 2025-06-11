@@ -1,18 +1,12 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-// dashboard.php - Versión corregida para crear BDs en MySQL local y asignar permisos
 session_start();
 require 'conexion.php';
 
-// 1. Verificar autenticación
 if (!isset($_SESSION['user'])) {
     header('Location: logister.php');
     exit;
 }
 
-// 2. Obtener nombre de la base de datos desde la URL
 $nombreBd = $_GET['bd'] ?? '';
 if (empty($nombreBd)) {
     die("<p class='text-danger'>❌ Debes seleccionar una base de datos.</p>");
@@ -20,7 +14,6 @@ if (empty($nombreBd)) {
 
 $conn = conectar();
 
-// 3. Obtener ID del usuario actual
 $stmtUserId = $conn->prepare("SELECT ID FROM usuarios WHERE CORREO = ?");
 $stmtUserId->bind_param("s", $_SESSION['user']);
 $stmtUserId->execute();
@@ -32,7 +25,6 @@ if ($resultUserId->num_rows !== 1) {
 $usuario = $resultUserId->fetch_assoc();
 $userId = $usuario['ID'];
 
-// 4. Verificar que el usuario tenga acceso a esta base de datos
 $stmtDb = $conn->prepare("SELECT b.NOMBRE_BD FROM usuario_base_datos ub JOIN base_datos b ON ub.ID_BD = b.ID_BD WHERE ub.ID_USUARIO = ? AND b.NOMBRE_BD = ?");
 $stmtDb->bind_param("is", $userId, $nombreBd);
 $stmtDb->execute();
@@ -42,7 +34,6 @@ if ($stmtDb->num_rows !== 1) {
     die("<p class='text-danger'>❌ No tienes acceso a esta base de datos.</p>");
 }
 
-// 5. Obtener credenciales de MySQL
 $stmtCred = $conn->prepare("SELECT ub.CORREO_USU AS CORREO, ub.CONTRASENA_USU AS CONTRASENA FROM usuario_base_datos ub  WHERE ub.ID_USUARIO = ? ");
 $stmtCred->bind_param("i", $userId);
 $stmtCred->execute();
@@ -59,14 +50,13 @@ $stmtCred->close();
 
 if($_SERVER['REQUEST_METHOD'] === 'POST') {
 $containerName = "$nombreBd";
-$dbHost = "172.17.0.1"; // Host del contenedor
-$dbName = "$nombreBd"; // Nombre de la base de datos
-$dbPort = "3306"; // Puerto de MySQL
+$dbHost = "172.17.0.1";
+$dbName = "$nombreBd";
+$dbPort = "3306";
 
 $output = "";
 $command = "";
 
-// 1. Verificar si el contenedor existe y su estado
 $exists = false;
 $isRunning = false;
 
@@ -75,8 +65,8 @@ if ($returnVar === 0) {
     $exists = true;
     $isRunning = true;
 } else {
-    $exists = false;
-    $isRunning = true;
+    $exists = true;
+    $isRunning = false;
 }
 
 
@@ -115,7 +105,6 @@ if (!$exists) {
 }
 
 
-// 4. Ejecutar comandos SQL dentro del contenedor
 if ($isRunning && isset($_POST['cmd'])) {
     $command = $_POST['sql_command'];
     $command = str_replace("exit", "sexi", $command);
@@ -155,7 +144,6 @@ if ($isRunning && isset($_POST['cmd'])) {
   <!-- FontAwesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"  rel="stylesheet">
 <style>
-  /* Temas dinámicos */
   :root {
     --bg-main: #f8f9fa;
     --text-main: #212529;

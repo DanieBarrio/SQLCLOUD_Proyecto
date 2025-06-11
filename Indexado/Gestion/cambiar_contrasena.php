@@ -12,7 +12,6 @@ function contraseña_valida($pass) {
     return strlen($pass) >= 8 && preg_match('/[^a-zA-Z0-9]/', $pass);
 }
 
-// Validar token al entrar con GET
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     if (empty($token)) {
         $mensaje = "❌ Tiempo inválido o no proporcionado.";
@@ -89,7 +88,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?= htmlspecialchars($mensaje) ?>
             </div>
         <?php endif; ?>
-        
         <?php if ($mostrar_formulario): ?>
         <form method="POST" class="space-y-4" onsubmit="return validarFormulario()">
             <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">

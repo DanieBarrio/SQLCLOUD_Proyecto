@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mail->isHTML(true);
                 $mail->Subject = 'Recuperación de contraseña';
                 $mail->Body = "Haz clic aquí para cambiar tu contraseña: 
-                <a href='http://sqlcloud.site/Gestion/cambiar_contrasena.php?token=$token'>Cambiar contraseña</a>";
+                <a href='https://www.sqlcloud.site:444/Gestion/cambiar_contrasena.php?token=$token'>Cambiar contraseña</a>";
 
                 $mail->send();
                 $mensaje = "✅ Correo enviado. Revisa tu bandeja de entrada.";
