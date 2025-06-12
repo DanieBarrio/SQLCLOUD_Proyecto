@@ -180,6 +180,14 @@ foreach ($databases as $db) {
         <p class="hover:text-blue-300 transition">¡Bienvenido a tu Panel!</p>
       </nav>
       <div class="flex items-center space-x-4">
+
+	<!-- Nuevo botón de ayuda -->
+        <a href="contacto.php" title="Ayuda y Soporte" class="p-2 text-gray-300 hover:text-blue-400 transition-colors duration-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </a>
+
         <!-- Botón de tema claro/oscuro -->
         <button id="toggleTheme" class="p-2 rounded-full hover:bg-gray-700 btn-dark-toggle">
           <i id="iconTheme" class="fas fa-moon text-lg"></i>
@@ -286,10 +294,6 @@ foreach ($databases as $db) {
         <div class="bg-gray-800 text-white p-6 rounded-lg shadow-lg mt-6">
 
           <h2 class="text-xl font-semibold mb-4">Mis Backups</h2>
-	<div class="card shadow border-0 mb-4 mt-4">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-              <h5 class="mb-0"><i class="fas fa-database me-2"></i> Generar Backup de Base de Datos</h5>
-            </div></div>
           <a href="lista_backups.php" class="inline-block bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded transition mb-4 flex items-center">
             <i class="fas fa-download me-2"></i> Ver todos mis backups
           </a>

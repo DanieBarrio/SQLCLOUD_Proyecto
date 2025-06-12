@@ -232,19 +232,58 @@ if ($isRunning && isset($_POST['cmd'])) {
     text-align: center;
     color: #6c757d;
   }
+  .btn-learn {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-top: 5px;
+  }
+
+  .btn-learn:hover {
+    background-color: #0056b3;
+ }
+ .btn-watch {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #ff0000;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-top: 5px;
+  }
+
+  .btn-watch:hover {
+    background-color: #cc0000;
+  }
 </style></head>
 <body class="<?= isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark' ? 'dark' : '' ?>">
+
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
-    <div class="container-fluid">
-      <a href="index.php" class="btn btn-primary me-2">
-        <i class="fas fa-arrow-left"></i> Volver a Inicio
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+  <div class="container-fluid d-flex justify-content-between align-items-center w-100">
+    
+    <a href="index.php" class="btn btn-primary me-2">
+      <i class="fas fa-arrow-left"></i> Volver a Inicio
+    </a>
+
+    <div class="d-flex gap-3">
+      <a href="ver-manual.php" target="_blank" rel="noopener noreferrer" class="btn-learn">
+        <i class="fas fa-book"></i> Quiero aprender
       </a>
-      <button id="themeToggle" class="btn btn-outline-secondary">
-        <i class="fas fa-moon"></i> Cambiar Tema
-      </button>
+      <a href="videos.php" class="btn-watch">
+        <i class="fab fa-youtube"></i> Quiero Ver
+      </a>
     </div>
-  </nav>
+
+    <button id="themeToggle" class="btn btn-outline-secondary">
+      <i class="fas fa-moon"></i> Cambiar Tema
+    </button>
+  </div>
+</nav>
 
   <div class="container mt-3">
     <h2 class="mb-4">⌨️ Terminal SQL - <?= htmlspecialchars($nombreBd) ?></h2>
@@ -253,7 +292,7 @@ if ($isRunning && isset($_POST['cmd'])) {
     <form method="POST" class="mb-4">
       <div class="mb-3">
         <label for="sql_command" class="form-label">Escribe un comando SQL</label>
-	<textarea name="sql_command" id="sql_command" class="form-control terminal-input" rows="12" placeholder="Ej: SELECT * FROM usuarios&#10;INSERT INTO tabla (col) VALUES ('valor');&#10;La palabra exit no es ejecutada en la base de datos"></textarea>
+	<textarea name="sql_command" id="sql_command" class="form-control terminal-input" rows="12" placeholder="La palabra exit no es ejecutada en la base de datos"></textarea>
       </div>
       <button type="submit" name="cmd" class="btn btn-primary">
         <i class="fas fa-terminal"></i> Ejecutar
@@ -269,7 +308,7 @@ if ($isRunning && isset($_POST['cmd'])) {
 <div class="mb-4">
   <h5>🧩 Plantillas SQL</h5>
   <div class="btn-group" role="group" aria-label="Plantillas SQL">
-    <button type="button" class="btn btn-outline-secondary" onclick="appendCommandToTextarea('CREATE TABLE nombre_tabla (id INT PRIMARY KEY AUTO_INCREMENT, campo1 VARCHAR(255), campo2 TEXT);\n-- Escribe aquí tu código personalizado')">CREATE TABLE</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="appendCommandToTextarea('CREATE TABLE nombre_tabla (\nid INT PRIMARY KEY AUTO_INCREMENT,\ncampo1 VARCHAR(255),\ncampo2 TEXT);')">CREATE TABLE</button>
     <button type="button" class="btn btn-outline-secondary" onclick="appendCommandToTextarea('INSERT INTO nombre_tabla (campo1, campo2) VALUES (\'valor1\', \'valor2\');')">INSERT INTO</button>
     <button type="button" class="btn btn-outline-secondary" onclick="appendCommandToTextarea('SELECT * FROM nombre_tabla;')">SELECT</button>
     <button type="button" class="btn btn-outline-secondary" onclick="appendCommandToTextarea('UPDATE nombre_tabla SET campo1 = \'nuevo_valor\' WHERE id = 1;')">UPDATE</button>

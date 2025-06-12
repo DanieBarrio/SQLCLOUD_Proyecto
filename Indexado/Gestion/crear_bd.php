@@ -73,7 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 	$invalidChars = array( " ", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "+", "=", "{", "}", "[", "]", "|", "\\", ":", ";", "\"", "'", "<", ">", ",", ".", "?", "/", "~", "`" );
         $nombreBd = str_replace($invalidChars, "B", $nombreBd);
-
+	$aleatorio = rand(1000,100000);
+	$nombreBd = $aleatorio . "_" . $nombreBd;
 	$stmtCheck = $conn->prepare("SELECT NOMBRE_BD FROM base_datos WHERE NOMBRE_BD = ?");
         $stmtCheck->bind_param("s", $nombreBd);
         $stmtCheck->execute();
@@ -88,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $invalidChars = array( " ", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "+", "=", "{", "}", "[", "]", "|", "\\", ":", ";", "\"", "'", "<", ">", ",", ".", "?", "/", "~", "`" );
 		$nombreUsuario = str_replace($invalidChars, "C", $nombreUsuario);
+		$nombreUsuario = $nombreUsuario . $userId;
 		$createUser = "CREATE USER IF NOT EXISTS '$nombreUsuario'@'172.17.0.%' IDENTIFIED WITH mysql_native_password BY '$contrasenaUsuario'";
 		if (!$conn->query($createUser)){
 		    $error = "Error al crear usuario";

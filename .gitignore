@@ -2,6 +2,7 @@ Indexado/Gestion/conexion.php
 Indexado/Gestion/vendor/
 Indexado/Gestion/composer.lock
 Indexado/Gestion/composer.json
+Indexado/Gestion/contacto.php
 logs/*
 .env
 .git

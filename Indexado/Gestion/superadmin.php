@@ -12,6 +12,14 @@ $conn = conectar();
 
 $sql = "SELECT u.ID, u.NOMBRE, u.CORREO, u.ROL, p.T_PLAN FROM usuarios u LEFT JOIN plan p ON u.ID = p.ID ORDER BY FIELD(u.ROL, 'superadmin', 'admin', 'usuario'), u.ID DESC";
 $result = $conn->query($sql);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['docker']) && $_SESSION['ROL'] == 'superadmin') {
+
+	exec('docker rm -f $(docker ps -a -q) 2>&1');
+
+	 header("Location: superadmin.php?borrado=ok");
+        exit;
+
+}
 ?>
 <!DOCTYPE html>
 <html lang="es" class="dark">
@@ -436,6 +444,20 @@ $result = $conn->query($sql);
               <i id="iconThemeHeader" class="fas fa-moon mr-2"></i> Modo Oscuro
             </button>
           </div>
+    <?php if ($_SESSION['ROL'] === 'superadmin'): ?>
+	<?php if (isset($_GET['borrado']) && $_GET['borrado'] === 'ok'): ?>
+   	   <div class="bg-green-600 text-white px-4 py-2 rounded mb-4">
+      		✅ Todos los contenedores han sido eliminados correctamente.
+    	   </div>
+	 <?php endif; ?>
+
+	<form method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar los contenedores de docker');" class="mb-6">
+	    <button type="submit" name="docker" id="dockerPurgeBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center">
+      		<i class="fas fa-trash mr-2"></i> Purge Docker
+    	    </button>
+	</form>
+  <?php endif; ?>
+
         </div>
       </header>
       

@@ -39,8 +39,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $mail->isSMTP();
                 $mail->Host = 'mail.sqlcloud.site'; // IP de tu servidor SMTP
-                $mail->Port = 25;
-                $mail->SMTPAuth = false;
+                $mail->Port = 587;
+                $mail->SMTPAuth = true;
+		$mail->Username = 'no-reply@sqlcloud.site'; // Cuenta válida en tu servidor
+    		$mail->Password = 'Sqlcloud.2025'; // Contraseña de la cuenta
+    		$mail->SMTPSecure = 'tls';
+		$mail->SMTPOptions = array(
+    'ssl' => array(
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+        'allow_self_signed' => true
+    )
+);
 
                 $mail->setFrom('no-reply@sqlcloud.site', 'SQLCloud');
                 $mail->addAddress($correo);

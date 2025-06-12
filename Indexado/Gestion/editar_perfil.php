@@ -43,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password_actual'])) {
         $_SESSION['NOMBRE_COMPLETO'] = $nombre;
         $_SESSION['CORREO'] = $correo;
         $response = ['exito' => true, 'mensaje' => 'Perfil actualizado correctamente.'];
+
     } else {
         $response['mensaje'] = 'Error al actualizar el perfil.';
     }

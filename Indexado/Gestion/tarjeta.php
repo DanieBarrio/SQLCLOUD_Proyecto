@@ -527,124 +527,139 @@ $datos = $res->fetch_assoc();
     };
 
 
-   function isValidCardNumber(number) {
-        const digits = number.replace(/\D/g, '').split('').map(Number);
-        let sum = 0;
-        for (let i = 0; i < digits.length; i++) {
-            let digit = digits[digits.length - 1 - i];
-            if (i % 2 === 1) {
-                digit *= 2;
-                if (digit > 9) digit -= 9;
-            }
-            sum += digit;
+function isValidCardNumber(number) {
+    const digits = number.replace(/\D/g, '').split('').map(Number);
+    let sum = 0;
+    for (let i = 0; i < digits.length; i++) {
+        let digit = digits[digits.length - 1 - i];
+        if (i % 2 === 1) {
+            digit *= 2;
+            if (digit > 9) digit -= 9;
         }
-        return sum % 10 === 0;
+        sum += digit;
     }
+    return sum % 10 === 0;
+}
+//Funcion validar fecha introducida / fecha actual
+function isFutureDate(mm, yy) {
+    const currentYear = new Date().getFullYear() % 100; // Últimos 2 dígitos del año actual
+    const currentMonth = new Date().getMonth() + 1; // Mes actual (empieza en 0)
+
+    if (yy < currentYear) return false;
+    if (yy === currentYear && mm < currentMonth) return false;
+    return true;
+}
 
     let currentCardType = 'default';
 
-    const validations = {
-        cardNumber: value => {
-            const cleaned = value.replace(/\D/g, '');
-            if (!cleaned) return 'El número de tarjeta es requerido';
+  const validations = {
+  cardNumber: value => {
+    const cleaned = value.replace(/\D/g, '');
+    if (!cleaned) return 'El número de tarjeta es requerido';
 
-            // Validación con algoritmo de Luhn
-            if (!isValidCardNumber(cleaned)) return 'Número de tarjeta no válido';
+    // Validación por tipo de tarjeta
+    const length = cleaned.length;
 
-            // Validación por tipo de tarjeta
-            const length = cleaned.length;
+    switch (currentCardType) {
+      case 'visa':
+        if (length !== 13 && length !== 16) return 'Visa debe tener 13 o 16 dígitos';
+        break;
+      case 'mastercard':
+        if (length !== 16) return 'MasterCard debe tener 16 dígitos';
+        break;
+      case 'amex':
+        if (length !== 15) return 'American Express debe tener 15 dígitos';
+        break;
+      case 'discover':
+        if (length !== 16) return 'Discover debe tener 16 dígitos';
+        break;
+      case 'default':
+      default:
+        return 'Solo aceptamos Visa, Mastercard, American Express y Discover';
+    }
 
-            switch (currentCardType) {
-                case 'visa':
-                    if (length !== 13 && length !== 16) return 'Visa debe tener 13 o 16 dígitos';
-                    break;
-                case 'mastercard':
-                    if (length !== 16) return 'MasterCard debe tener 16 dígitos';
-                    break;
-                case 'amex':
-                    if (length !== 15) return 'American Express debe tener 15 dígitos';
-                    break;
-                case 'discover':
-                    if (length !== 16) return 'Discover debe tener 16 dígitos';
-                    break;
-                case 'default':
-                default:
-                    return 'Solo aceptamos Visa, Mastercard, American Express y Discover';
-            }
+    return '';
+  },
 
-            return '';
-        },
+  cardName: value => {
+    if (!value) return 'El nombre es requerido';
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{5,}$/.test(value)) return 'Nombre no válido';
+    return '';
+  },
 
-        cardName: value => {
-            if (!value) return 'El nombre es requerido';
-            if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{5,}$/.test(value)) return 'Nombre no válido';
-            return '';
-        },
+  cardExp: value => {
+    if (!value) return 'La fecha de expiración es requerida';
 
-        cardExp: value => {
-            if (!value) return 'La fecha de expiración es requerida';
-            if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(value)) return 'Formato MM/AA requerido';
-            return '';
-        },
+    const match = /^(0[1-9]|1[0-2])\/?(\d{2})$/.exec(value);
+    if (!match) return 'Formato MM/AA requerido';
 
-        cardCvc: value => {
-            const length = currentCardType === 'amex' ? 4 : 3;
-            if (!value) return 'El código de seguridad es requerido';
-            if (value.length !== length) return `El código debe tener ${length} dígitos`;
-            return '';
-        }
-    };
+    const month = parseInt(match[1], 10);
+    const year = parseInt(match[2], 10);
+
+    if (!isFutureDate(month, year)) {
+        return 'La tarjeta ha expirado';
+    }
+
+    return '';
+  },
+
+  cardCvc: value => {
+    const length = currentCardType === 'amex' ? 4 : 3;
+    if (!value) return 'El código de seguridad es requerido';
+    if (value.length !== length) return `El código debe tener ${length} dígitos`;
+    return '';
+  }
+};
+
 
     // Manejo de eventos
-
     elements.numberInput.addEventListener('input', function(e) {
-        const value = e.target.value.replace(/\D/g, '');
-        const formatted = value.replace(/(.{4})/g, '$1 ').trim();
-        e.target.value = formatted.substring(0, 19);
-
-        elements.previews.number.textContent = formatted.padEnd(19, '#');
-        detectCardType(value);
-        updateCardStyle();
+      const value = e.target.value.replace(/\D/g, '');
+      const formatted = value.replace(/(.{4})/g, '$1 ').trim();
+      e.target.value = formatted.substring(0, 19);
+      
+      elements.previews.number.textContent = formatted.padEnd(19, '#');
+      detectCardType(value);
+      updateCardStyle();
     });
 
     elements.nameInput.addEventListener('input', function(e) {
-        elements.previews.name.textContent = e.target.value || "Nombre Apellido";
+      elements.previews.name.textContent = e.target.value || "Nombre Apellido";
     });
 
     elements.expInput.addEventListener('input', function(e) {
-        const value = e.target.value.replace(/\D/g, '');
-        let formatted = value;
-        if (value.length > 2) formatted = `${value.slice(0,2)}/${value.slice(2,4)}`;
-        e.target.value = formatted.substring(0,5);
-        elements.previews.exp.textContent = formatted || "MM/AA";
+      const value = e.target.value.replace(/\D/g, '');
+      let formatted = value;
+      if (value.length > 2) formatted = `${value.slice(0,2)}/${value.slice(2,4)}`;
+      e.target.value = formatted.substring(0,5);
+      elements.previews.exp.textContent = formatted || "MM/AA";
     });
-
-    elements.cvcInput.addEventListener('input', function(e) {
+// Solo permitir números en el campo CVC
+        elements.cvcInput.addEventListener('input', function(e) {
         this.value = this.value.replace(/[^0-9]/g, '');
-    });
+        });
 
     elements.form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        clearErrors();
+      e.preventDefault();
+      clearErrors();
 
-        const errors = {
-            number: validations.cardNumber(elements.numberInput.value),
-            name: validations.cardName(elements.nameInput.value),
-            exp: validations.cardExp(elements.expInput.value),
-            cvc: validations.cardCvc(elements.cvcInput.value)
-        };
+      const errors = {
+        number: validations.cardNumber(elements.numberInput.value),
+        name: validations.cardName(elements.nameInput.value),
+        exp: validations.cardExp(elements.expInput.value),
+        cvc: validations.cardCvc(elements.cvcInput.value)
+      };
 
-        const hasErrors = Object.values(errors).some(error => error);
-
-        if (!hasErrors) {
-            document.getElementById('modal-confirm').style.display = 'flex';
-        } else {
-            Object.keys(errors).forEach(field => {
-                if (errors[field]) showError(field, errors[field]);
-            });
-        }
+      const hasErrors = Object.values(errors).some(error => error);
+      
+      if (!hasErrors) {
+        document.getElementById('modal-confirm').style.display = 'flex';
+      } else {
+        Object.keys(errors).forEach(field => {
+          if (errors[field]) showError(field, errors[field]);
+        });
+      }
     });
-
 
 
     // Funciones auxiliares

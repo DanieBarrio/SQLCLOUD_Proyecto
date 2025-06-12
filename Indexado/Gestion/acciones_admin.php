@@ -200,6 +200,17 @@ if ($accion === 'eliminar_usuario') {
     }
 
     try {
+	$stmt = $conn->prepare("SELECT NOMBRE_BD FROM base_datos WHERE ID_BD = ?");
+        $stmt->bind_param("i", $id_bd);
+        $stmt->execute();
+        $result = $stmt->get_result();
+	$row = $result->fetch_assoc();
+	$name = $row['NOMBRE_BD'];
+	$stmt->close();
+	$stmt = $conn->prepare("DROP DATABASE `" . $conn->real_escape_string($name) . "`");
+        $stmt->execute();
+        $stmt->close();
+
         $stmt = $conn->prepare("DELETE FROM base_datos WHERE ID_BD = ?");
         $stmt->bind_param("i", $id_bd);
         $stmt->execute();
