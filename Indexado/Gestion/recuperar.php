@@ -44,20 +44,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		$mail->Username = 'no-reply@sqlcloud.site'; // Cuenta válida en tu servidor
     		$mail->Password = 'Sqlcloud.2025'; // Contraseña de la cuenta
     		$mail->SMTPSecure = 'tls';
-		$mail->SMTPOptions = array(
-    'ssl' => array(
-        'verify_peer' => false,
-        'verify_peer_name' => false,
-        'allow_self_signed' => true
-    )
-);
 
                 $mail->setFrom('no-reply@sqlcloud.site', 'SQLCloud');
                 $mail->addAddress($correo);
                 $mail->isHTML(true);
-                $mail->Subject = 'Recuperación de contraseña';
-                $mail->Body = "Haz clic aquí para cambiar tu contraseña: 
-                <a href='https://www.sqlcloud.site:444/Gestion/cambiar_contrasena.php?token=$token'>Cambiar contraseña</a>";
+                $mail->Subject = 'Alerta de Seguridad';
+		$mail->Body = "
+<html>
+  <body style='font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;'>
+    <div style='max-width: 600px; margin: auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);'>
+      <h2 style='color: #333;'>Recuperación de contraseña - SQLCloud</h2>
+      <p>Hola,</p>
+      <p>Hemos recibido una solicitud para restablecer tu contraseña. Si no hiciste esta solicitud, puedes ignorar este correo.</p>
+      <p>Para restablecer tu contraseña, haz clic en el siguiente botón:</p>
+      <p style='text-align: center;'>
+        <a href='https://www.sqlcloud.site:444/Gestion/cambiar_contrasena.php?token=$token' 
+           style='display: inline-block; background-color: #4CAF50; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;'>
+          Cambiar contraseña
+        </a>
+      </p>
+      <p>Este enlace expirará en 1 hora por motivos de seguridad.</p>
+      <hr style='margin-top: 30px;'>
+      <p style='font-size: 12px; color: #888;'>SQLCloud - Gestión de usuarios segura</p>
+    </div>
+  </body>
+</html>";
+
 
                 $mail->send();
                 $mensaje = "✅ Correo enviado. Revisa tu bandeja de entrada.";

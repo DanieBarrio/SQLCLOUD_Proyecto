@@ -41,7 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password_actual'])) {
     $stmt->bind_param("ssi", $nombre, $correo, $userId);
     if ($stmt->execute()) {
         $_SESSION['NOMBRE_COMPLETO'] = $nombre;
-        $_SESSION['CORREO'] = $correo;
+	$ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+	$evento = 'Cambio de correo/nombre';
+	$fecha = date('Y-m-d H:i:s');
+	$correo2= "Id: ". $userId . " | Correo actual: " . $correo . " | Nombre actual: ". $nombre ;
+	$linea = "[$fecha] [$ip] [$correo2] $evento";
+	file_put_contents("/var/www/sqlcloud.site/logs/logs.txt", $linea . PHP_EOL, FILE_APPEND | LOCK_EX);
+
         $response = ['exito' => true, 'mensaje' => 'Perfil actualizado correctamente.'];
 
     } else {

@@ -51,9 +51,7 @@ $exito = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tokenRecibido = $_POST['csrf_token'] ?? '';
     if ($tokenRecibido == "" || $tokenRecibido != $_SESSION['csrf_token']){
-        session_unset();
-        session_destroy();
-        header('Location: logister.php');
+        header('Location: index.php');
         exit;
     }
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -98,10 +96,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$conn->query($grantSql)) {
                     $error = "Error al asignar permisos";
                 } else {
-
-                    if (!$conn->query("FLUSH PRIVILEGES")) {
-                        $error = "Error al actualizar privilegios";
-                    } else {
+                      if (!$conn->query("FLUSH PRIVILEGES")) {
+                           $error = "Error al actualizar privilegios";
+                      } else {
 
                         $stmtInsertBd = $conn->prepare("INSERT INTO base_datos (NOMBRE_BD) VALUES (?)");
                         $stmtInsertBd->bind_param("s", $nombreBd);
@@ -120,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         } else {
                             $error = "Error al asignar acceso a la base de datos.";
                         }
-                    }
+	 	   }
                 }
             }
         }

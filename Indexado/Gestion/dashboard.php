@@ -108,6 +108,8 @@ if (!$exists) {
 if ($isRunning && isset($_POST['cmd'])) {
     $command = $_POST['sql_command'];
     $command = str_replace("exit", "sexi", $command);
+    $command = str_replace("drop database", "sin permiso de borrar base de datos", $command);
+    $command = str_replace("grant", "sin permiso de grant", $command);
     $comprobar = str_replace(" ", "", $command);
     if($comprobar != ""){
     $execCmd = "docker exec $containerName mariadb " .

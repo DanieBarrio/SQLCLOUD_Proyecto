@@ -14,6 +14,7 @@ if (!isset($_SESSION['user'])) {
     <title>Vídeos sobre SQL - SQLCloud</title>
     <link rel="icon" type="image/png" href="../Recursos/favicon.png?v=2">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"  rel="stylesheet">
+   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"  rel="stylesheet">
     <style>
         :root {
             --bg-main: #f8f9fa;
@@ -111,32 +112,18 @@ if (!isset($_SESSION['user'])) {
                 width: 100%;
             }
         }
-        .btn-learn {
-    	  display: inline-block;
-    	  padding: 10px 15px;
-    	  background-color: #007bff;
-    	  color: white;
-    	  text-decoration: none;
-    	  border-radius: 4px;
-    	  margin-top: 5px;
-            }
-
+   .btn-learn {
+      display: inline-block;
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      margin-top: 5px;
+   }
  	 .btn-learn:hover {
     	   background-color: #0056b3;
  		}
- 	 .btn-watch {
-    	   display: inline-block;
-    	   padding: 10px 15px;
-    	   background-color: #ff0000;
-    	   color: white;
-    	   text-decoration: none;
-    	   border-radius: 4px;
-    	   margin-top: 5px;
-  	  }
-
-  	.btn-watch:hover {
-    	  background-color: #cc0000;
-  	}
     </style>
 </head>
 <body class="<?= isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark' ? 'dark' : '' ?>">
@@ -153,9 +140,6 @@ if (!isset($_SESSION['user'])) {
         <div class="d-flex gap-3">
             <a href="ver-manual.php" target="_blank" rel="noopener noreferrer" class="btn-learn">
                 <i class="fas fa-book"></i> Quiero aprender
-            </a>
-            <a href="videos.php" class="btn-watch">
-                <i class="fab fa-youtube"></i> Quiero ver
             </a>
         </div>
 
