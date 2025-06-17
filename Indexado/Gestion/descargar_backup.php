@@ -3,9 +3,9 @@ session_start();
 require 'conexion.php';
 
 if (!isset($_SESSION['user']) || empty($_GET['file'])) header('Location: logister.php');
-$user = $_SESSION['user'];
+$id = $_SESSION['ID'];
 $file = basename($_GET['file']);
-$path = "/var/backups/sqlcloud/$user/$file";
+$path = "/var/backups/sqlcloud/$id/$file";
 
 if (!file_exists($path)) {
   http_response_code(404);

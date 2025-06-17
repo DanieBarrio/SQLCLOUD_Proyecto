@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		if (!$conn->query($createUser)){
 		    $error = "Error al crear usuario";
 		}
-                $grantSql = "GRANT ALL PRIVILEGES ON `$nombreBd`.* TO '$nombreUsuario'@'172.17.0.%'";
+                $grantSql = "GRANT CREATE, SELECT, DELETE, UPDATE, INSERT, ALTER, REFERENCES, INDEX, CREATE TEMPORARY TABLES, LOCK TABLES ON `$nombreBd`.* TO '$nombreUsuario'@'172.17.0.%'";
                 if (!$conn->query($grantSql)) {
                     $error = "Error al asignar permisos";
                 } else {

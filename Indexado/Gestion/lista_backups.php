@@ -7,8 +7,8 @@ if (!isset($_SESSION['user'])) {
   exit;
 }
 
-$user = $_SESSION['user'];
-$dir = "/var/backups/sqlcloud/" . $user;
+$id = $_SESSION['ID'];
+$dir = "/var/backups/sqlcloud/" . $id;
 if (!is_dir($dir)) $files = [];
 else {
   $files = array_filter(scandir($dir), fn($f) => preg_match('/\.sql\.gz$/', $f));
@@ -19,6 +19,7 @@ else {
 <head>
   <meta charset="UTF-8">
   <title>Mis Backups</title>
+  <link rel="icon" type="image/png" href="../Recursos/favicon.png?v=2">
   <style>
     /* Estilos generales */
     body {

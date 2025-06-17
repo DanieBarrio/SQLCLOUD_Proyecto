@@ -83,9 +83,9 @@ function getDatabaseSize($conn, $dbName) {
               FROM information_schema.tables
               WHERE TABLE_SCHEMA = '$dbName'
               GROUP BY TABLE_SCHEMA";
-    
+
     $result = $conn->query($query);
-    
+
     if ($result && $row = $result->fetch_assoc()) {
         return floatval($row['Tamaño (MB)']);
     }
@@ -299,16 +299,16 @@ foreach ($databases as $db) {
           </a>
 <?php
             // Obtener el nombre del usuario logueado
-            $user = $_SESSION['user'];
-                          
+            $id = $_SESSION['ID'];
+
             // Definir la ruta donde se almacenan los backups del usuario
-            $dir = "/var/backups/sqlcloud/" . $user;
-                          
+            $dir = "/var/backups/sqlcloud/" . $id;
+
             // Verificar si la carpeta existe
             if (is_dir($dir)) {
                 // Listar todos los archivos en la carpeta
                 $allFiles = scandir($dir);
-            
+
                 // Filtrar solo los archivos que terminan en ".sql.gz"
                 $filteredFiles = [];
                 foreach ($allFiles as $file) {
@@ -316,10 +316,10 @@ foreach ($databases as $db) {
                         $filteredFiles[] = $file;
                     }
                 }
-              
+
                 // Reordenar para tener los más recientes primero
                 $reversedFiles = array_reverse($filteredFiles);
-              
+
                 // Tomar solo los 3 últimos backups
                 $latestBackups = array_slice($reversedFiles, 0, 3);
             } else {
@@ -327,7 +327,7 @@ foreach ($databases as $db) {
                 $latestBackups = [];
             }
             ?>
-            
+
             <!-- Mostrar contenido según si hay backups o no -->
             <?php if (empty($latestBackups)): ?>
               <p>No tienes backups disponibles.</p>
@@ -337,7 +337,7 @@ foreach ($databases as $db) {
                   <li class="flex justify-between items-center border-b border-gray-700 pb-2">
                     <!-- Mostrar nombre del archivo -->
                     <span><?= htmlspecialchars($file) ?></span>
-                
+
                     <!-- Enlace para descargar -->
                     <a href="descargar_backup.php?file=<?= urlencode($file) ?>" class="text-blue-400 hover:text-blue-300 transition">
                       Descargar
@@ -450,156 +450,217 @@ foreach ($databases as $db) {
       }
     });
 
-		// Lógica edición de perfil
-let originales = {};
-let esEdicion = false;
+    // Lógica edición de perfil
+    let originales = {};
+    let esEdicion = false;
 
-function setupEditarBtn() {
-  const editarBtn = document.getElementById('editarBtnModal');
-  const cancelarBtn = document.getElementById('cancelarBtnModal');
-  const acciones = document.getElementById('accionesEdicionModal');
-  const nombreInput = document.getElementById('nombreModal');
+    function setupEditarBtn() {
+      const editarBtn = document.getElementById('editarBtnModal');
+      const cancelarBtn = document.getElementById('cancelarBtnModal');
+      const acciones = document.getElementById('accionesEdicionModal');
+      const inputs = document.querySelectorAll('#perfilFormModal input:not([type="hidden"])');
 
-  if (!editarBtn || !acciones || !nombreInput) return;
 
-  const nuevoBtn = editarBtn.cloneNode(true);
-  editarBtn.replaceWith(nuevoBtn);
+      if (!editarBtn || !acciones || !inputs.length) return;
 
-  nuevoBtn.addEventListener('click', () => {
-    esEdicion = true;
-    nombreInput.readOnly = false;
-    nombreInput.classList.replace('campo-inactivo', 'campo-activo');
-    nuevoBtn.classList.add('d-none');
-    acciones.classList.remove('d-none');
-  });
 
-  if (cancelarBtn) {
-    cancelarBtn.onclick = null;
-    cancelarBtn.addEventListener('click', () => {
-      nombreInput.value = originales['nombreModal'] || '';
-      nombreInput.readOnly = true;
-      nombreInput.classList.replace('campo-activo', 'campo-inactivo');
-      acciones.classList.add('d-none');
-      nuevoBtn.classList.remove('d-none');
-      esEdicion = false;
-    });
-  }
-}
 
-document.addEventListener("DOMContentLoaded", () => {
-  const modalPerfilElem = document.getElementById('modalPerfil');
-  const form = document.getElementById('perfilFormModal');
-  const alertDiv = document.getElementById('alertasModal');
 
-  if (modalPerfilElem) {
-    const modalPerfil = new bootstrap.Modal(modalPerfilElem);
+      const nuevoBtn = editarBtn.cloneNode(true);
+      editarBtn.replaceWith(nuevoBtn);
 
-    modalPerfilElem.addEventListener('shown.bs.modal', () => {
-      const nombreInput = document.getElementById('nombreModal');
-      originales['nombreModal'] = nombreInput.value.trim();
-      setupEditarBtn();
-    });
-
-    modalPerfilElem.addEventListener('hidden.bs.modal', () => {
-      const nombreInput = document.getElementById('nombreModal');
-      nombreInput.readOnly = true;
-      nombreInput.classList.replace('campo-activo', 'campo-inactivo');
-      esEdicion = false;
-    });
-  }
-
-  if (form && alertDiv) {
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-
-      if (!esEdicion) {
-        alertDiv.innerHTML = `<div class="alert alert-warning">Primero debes habilitar la edición.</div>`;
-        return;
-      }
-
-      const nombreInput = document.getElementById('nombreModal');
-      const hayCambios = nombreInput.value.trim() !== originales['nombreModal'];
-
-      if (!hayCambios) {
-        alertDiv.innerHTML = `<div class="alert alert-warning">No se detectaron cambios.</div>`;
-        return;
-      }
-
-      const modalHtml = `
-        <div class="modal fade" id="modalVerificacionPass" tabindex="-1">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">Verificación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-              </div>
-              <div class="modal-body">
-                <label class="form-label">Contraseña actual</label>
-                <input type="password" class="form-control" id="password_actual_modal" required>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button class="btn btn-primary" id="confirmarVerificacionPass">Verificar</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-      document.body.insertAdjacentHTML('beforeend', modalHtml);
-      const modalPass = new bootstrap.Modal(document.getElementById('modalVerificacionPass'));
-      modalPass.show();
-
-      document.getElementById('confirmarVerificacionPass').addEventListener('click', () => {
-        const pass = document.getElementById('password_actual_modal').value.trim();
-        if (pass.length < 8) {
-          alert('Contraseña inválida.');
-          return;
-        }
-
-        const formData = new FormData(form);
-        formData.append('password_actual', pass);
-
-        fetch('editar_perfil.php', {
-          method: 'POST',
-          body: formData
-        })
-        .then(r => r.json())
-        .then(data => {
-          const mensaje = data.mensaje || '';
-          const esExito = data.exito === true || data.exito === "true";
-          alertDiv.innerHTML = `
-            <div class="alert alert-${esExito ? 'success' : 'danger'}" style="background-color: ${esExito ? '#28a745' : '#dc3545'} !important; color: #fff !important;">
-              ${mensaje}
-            </div>
-          `;
-
-          if (esExito) {
-            const nombreInput = document.getElementById('nombreModal');
-            nombreInput.readOnly = true;
-            nombreInput.classList.replace('campo-activo', 'campo-inactivo');
-            originales['nombreModal'] = nombreInput.value.trim();
-
-            const editarBtn = document.getElementById('editarBtnModal');
-            const acciones = document.getElementById('accionesEdicionModal');
-            if (editarBtn && acciones) {
-              acciones.classList.add('d-none');
-              editarBtn.classList.remove('d-none');
-            }
-          }
-        })
-        .catch(err => {
-          console.error('Error:', err);
-          alertDiv.innerHTML = `<div class="alert alert-danger">Error inesperado al actualizar el perfil.</div>`;
+      nuevoBtn.addEventListener('click', () => {
+        esEdicion = true;
+        inputs.forEach(input => {
+          input.readOnly = false;
+          input.classList.replace('campo-inactivo', 'campo-activo');
         });
-
-        modalPass.hide();
-        document.getElementById('modalVerificacionPass').addEventListener('hidden.bs.modal', () => {
-          document.getElementById('modalVerificacionPass').remove();
-        });
+        nuevoBtn.classList.add('d-none');
+        acciones.classList.remove('d-none');
       });
+
+      if (cancelarBtn) {
+        cancelarBtn.onclick = null;
+        cancelarBtn.addEventListener('click', () => {
+          inputs.forEach(input => {
+            input.value = originales[input.id] || '';
+            input.readOnly = true;
+            input.classList.replace('campo-activo', 'campo-inactivo');
+          });
+          acciones.classList.add('d-none');
+          nuevoBtn.classList.remove('d-none');
+          esEdicion = false;
+        });
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const modalPerfilElem = document.getElementById('modalPerfil');
+      const form = document.getElementById('perfilFormModal');
+      const alertDiv = document.getElementById('alertasModal');
+
+      if (modalPerfilElem) {
+        const modalPerfil = new bootstrap.Modal(modalPerfilElem);
+
+        modalPerfilElem.addEventListener('shown.bs.modal', () => {
+          const inputs = document.querySelectorAll('#perfilFormModal input:not([type="hidden"])');
+          originales = {};
+          inputs.forEach(input => {
+            originales[input.id] = input.value.trim();
+          });
+          setupEditarBtn();
+        });
+
+        modalPerfilElem.addEventListener('hidden.bs.modal', () => {
+          const inputs = document.querySelectorAll('#perfilFormModal input:not([type="hidden"])');
+          inputs.forEach(input => {
+            input.readOnly = true;
+            input.classList.replace('campo-activo', 'campo-inactivo');
+          });
+          esEdicion = false;
+        });
+      }
+
+      if (form && alertDiv) {
+        form.addEventListener('submit', e => {
+          e.preventDefault();
+
+          if (!esEdicion) {
+            alertDiv.innerHTML = `<div class="alert alert-warning">Primero debes habilitar la edición.</div>`;
+            return;
+          }
+
+          const nombreInput = document.getElementById('nombreModal');
+          const correoInput = document.getElementById('correoModal');
+
+          const hayCambios = (
+            nombreInput.value.trim() !== originales['nombreModal']?.trim() ||
+            correoInput.value.trim() !== originales['correoModal']?.trim()
+          );
+
+          if (!hayCambios) {
+            alertDiv.innerHTML = `<div class="alert alert-warning">No se detectaron cambios.</div>`;
+            return;
+          }
+
+          const modalHtml = `
+            <div class="modal fade" id="modalVerificacionPass" tabindex="-1">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Verificación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                  </div>
+                  <div class="modal-body">
+                    <label class="form-label">Contraseña actual</label>
+                    <input type="password" class="form-control" id="password_actual_modal" required>
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-primary" id="confirmarVerificacionPass">Verificar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          `;
+          document.body.insertAdjacentHTML('beforeend', modalHtml);
+          const modalPass = new bootstrap.Modal(document.getElementById('modalVerificacionPass'));
+          modalPass.show();
+
+          document.getElementById('confirmarVerificacionPass').addEventListener('click', () => {
+            const pass = document.getElementById('password_actual_modal').value.trim();
+            if (pass.length < 8) {
+              alert('Contraseña inválida.');
+              return;
+            }
+
+            const formData = new FormData(form);
+            formData.append('password_actual', pass);
+
+            fetch('editar_perfil.php', {
+              method: 'POST',
+              body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+              const mensaje = data.mensaje || '';
+              const esExito = data.exito === true || data.exito === "true";
+              alertDiv.innerHTML = `
+                <div class="alert alert-${esExito ? 'success' : 'danger'}" style="background-color: ${esExito ? '#28a745' : '#dc3545'} !important; color: #fff !important;">
+                  ${mensaje}
+                </div>
+              `;
+              if (esExito) {
+                [nombreInput, correoInput].forEach(input => {
+                  input.readOnly = true;
+                  input.classList.replace('campo-activo', 'campo-inactivo');
+                });
+                originales['nombreModal'] = nombreInput.value.trim();
+                originales['correoModal'] = correoInput.value.trim();
+
+                const correoAnterior = originales['correoModal'];
+                const correoNuevo = correoInput.value.trim();
+                if (correoAnterior !== correoNuevo) {
+                  const alerta = document.createElement('div');
+                  alerta.className = 'alert alert-info mt-3';
+                  alerta.style.cssText = 'background-color: #17a2b8 !important; color: #fff !important;';
+                  alerta.textContent = 'Has cambiado tu correo electrónico. Serás redirigido al inicio de sesión...';
+                  alertDiv.appendChild(alerta);
+                  setTimeout(() => window.location.href = 'logister.php', 4000);
+                }
+
+                const editarBtn = document.getElementById('editarBtnModal');
+                const acciones = document.getElementById('accionesEdicionModal');
+                if (editarBtn && acciones) {
+                  acciones.classList.add('d-none');
+                  editarBtn.classList.remove('d-none');
+                }
+              }
+            })
+            .catch(err => {
+              console.error('Error:', err);
+              alertDiv.innerHTML = `<div class="alert alert-danger">Error: Otro usuario tiene este correo.</div>`;
+            });
+
+            modalPass.hide();
+            document.getElementById('modalVerificacionPass').addEventListener('hidden.bs.modal', () => {
+              document.getElementById('modalVerificacionPass').remove();
+            });
+          });
+        });
+      }
     });
-  }
-});
+
+
 
   </script>
 </body>
